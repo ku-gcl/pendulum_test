@@ -9,6 +9,11 @@ g++ -o LED LED.cpp -lpigpiod_if2 -lrt
 sudo ./LED
 ```
 
+```
+g++ -o driver_test driver_test.cpp -lpigpiod_if2 -lrt
+sudo ./driver_test
+```
+
 ## ROSノードをすべて終了するとき
 - `grep ros`でrosのプロセスを検索
 - `grep -v grep`で`grep`自体のプロセスを除外
