@@ -3,9 +3,9 @@
 #include <iostream>
 
 // LED ============================================= 
-const int LED_pin1 = 22
-const int LED_pin2 = 17
-const int LED_pin3 = 27
+const int LED_pin1 = 22;
+const int LED_pin2 = 17;
+const int LED_pin3 = 27;
 
 // rotary encoder =============================================
 const int encoder_pin1 = 24;  // to A
@@ -18,7 +18,7 @@ const int motor_pwm = 12; // Motor driver PWM input 32
 
 int main() {
     // Initialize pigpio
-    pi = pigpio_start(NULL,NULL);
+    int pi = pigpio_start(NULL,NULL);
 
     // ***** LED cleanup *****
     set_mode(pi, LED_pin1, PI_OUTPUT );   // red
