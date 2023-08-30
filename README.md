@@ -14,6 +14,14 @@ g++ -o driver_test driver_test.cpp -lpigpiod_if2 -lrt
 sudo ./driver_test
 ```
 
+## ボタン用のスクリプトを実行
+```bash
+python3 /home/ubuntu/pendulum_project/pendulum_test/shutdown.py
+```
+
+`python`ではなく、`python3`を使用すること。
+`python`を使うと、GPIOピンのON/OFFが動作しなくなる。
+
 ## ROSノードをすべて終了するとき
 - `grep ros`でrosのプロセスを検索
 - `grep -v grep`で`grep`自体のプロセスを除外
