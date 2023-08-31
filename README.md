@@ -120,7 +120,32 @@ sudo systemctl disable pendulum.service
 sudo systemctl daemon-reload
 ```
 
+## pigpiod.serviceを編集
 
+[pigpio DaemonのOption](https://abyz.me.uk/rpi/pigpio/pigpiod.html)
+
+```bash
+sudo touch /etc/systemd/system/pigpiod.service
+sudo nano /etc/systemd/system/pigpiod.service
+```
+
+```
+[Unit]
+Description=Daemon required to control GPIO pins via pigpio
+[Service]
+#ExecStart=/usr/local/bin/pigpiod -l -m #Disable alerts
+ExecStart=/usr/local/bin/pigpiod -s 1 -m #Disable alerts
+ExecStop=/bin/systemctl kill pigpiod
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo killall pigpiod
+sudo systemctl status pigpiod
+```
 
 
 ## ROS ノードをすべて終了するとき
