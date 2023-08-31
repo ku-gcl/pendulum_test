@@ -19,7 +19,8 @@ sudo ./driver_test
 ## Kalman filter なしのプログラムを実行
 
 ```bash
-g++
+g++ -o pendulum inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread
+sudo ./pendulum
 ```
 
 ## ボタン用のスクリプトを実行

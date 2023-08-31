@@ -44,7 +44,7 @@ while True:
             sw_counter1 = sw_counter1 + 1
             if sw_counter1 >= 50:
                 print("オヤスミ")
-                #os.system("sudo shutdown -h now")
+                os.system("sudo shutdown -h now")
                 break
 
         # pin1: ON, pin2: OFF / pin1: OFF, pin2: ON
