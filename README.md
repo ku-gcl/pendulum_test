@@ -81,6 +81,48 @@ sudo killall -9 PENDULUM
 sudo /home/ubuntu/PENDULUM_CLEANUP
 ```
 
+## 自動起動
+
+[systemdを使ってスクリプト自動起動](https://monomonotech.jp/kurage/raspberrypi/systemd_autostart.html)
+
+```bash
+sudo touch /etc/systemd/system/pendulum.service
+sudo nano /etc/systemd/system/pendulum.service
+```
+
+pendulum.serviceを編集。
+
+```pendulum.service
+[Unit]
+Description=Execution pendulum auto start script
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 pendulum_auto_start_script.py
+WorkingDirectory=/home/ubuntu/pendulum_project/pendulum_test
+
+[Install]
+WantedBy=multi-user.target
+```
+
+サービスを有効化するには、以下のコマンドを実行
+
+```bash
+# 有効化
+sudo systemctl enable pendulum.service
+
+# 無効化
+sudo systemctl disable pendulum.service
+```
+
+サービスファイルを編集したときは
+```bash
+sudo systemctl daemon-reload
+```
+
+
+
+
 ## ROS ノードをすべて終了するとき
 
 - `grep ros`で ros のプロセスを検索
