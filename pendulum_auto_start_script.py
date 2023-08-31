@@ -40,19 +40,19 @@ while True:
             if sw2_timer >= 20:
                 # すでにC++コードが実行されていたら現在の実行を中断する
                 if CODE_EXEC_FLAG:
+                    # kill for ROS
                     ABORT_CMD1 = "ps aux | grep ros | grep -v grep | awk '{ print \"kill -9\", $2 }' | sh"
+                    # Compile terminate script
                     ABORT_CMD2 = "g++ -o /home/ubuntu/PENDULUM_CLEANUP /home/ubuntu/pendulum_project/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt"
                     ABORT_CMD3 = "sudo /home/ubuntu/PENDULUM_CLEANUP"
+                    # kill for C++ code
+                    KILL_CMD = "sudo killall -9 PENDULUM"
                     
                     # 実行したプロセスを終了
-                    # exec_process.terminate()
                     exec_process.kill()
-                    # subprocess.run(ABORT_CMD1, shell=True)
-                    # subprocess.run(ABORT_CMD2, shell=True)
-                    # os.kill(exec_process.pid, signal.CTRL_C_EVENT)
-                    
-                    KILL_CMD = "sudo killall -9 PENDULUM"
                     subprocess.run(KILL_CMD, shell=True)
+                    subprocess.run(ABORT_CMD1, shell=True)
+                    subprocess.run(ABORT_CMD2, shell=True)
                     subprocess.run(ABORT_CMD3, shell=True)
                     print("-------Control END------\n")
                     CODE_EXEC_FLAG = False
