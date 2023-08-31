@@ -58,8 +58,9 @@ while True:
                 COMPILE_CMD = "g++ -o /home/ubuntu/PENDULUM /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread"
                 # プログラムの実行コマンド
                 EXEC_CMD = "sudo /home/ubuntu/PENDULUM"
-                subprocess.call(COMPILE_CMD, shell=True)
-                # subprocess.call(EXEC_CMD, shell=True)
+                subprocess.run(COMPILE_CMD, shell=True)
+                # C++コードをバックグラウンドで実行。そのためにsubprocess.Popenを使用
+                subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 
                 print("-------Control Executed------\n")
                 CODE_EXEC_FLAG = True
@@ -71,7 +72,7 @@ while True:
             sw1_timer = sw1_timer + 1
             if sw1_timer >= 50:
                 print("-------SHUTDOWN------\n")
-                # subprocess.run("sudo shutdown -h now", shell=True)
+                subprocess.run("sudo shutdown -h now", shell=True)
                 break
 
         # (sw1_status==1 and sw2_status==1) or (sw1_status==0 and sw2_status==1)
