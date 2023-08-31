@@ -41,8 +41,9 @@ python3 /home/ubuntu/pendulum_project/pendulum_test/shutdown.py
 sudo nano /boot/firmware/config.txt
 ```
 
-```txt
-# config.txt
+config.txtを編集
+
+```config.txt
 
 ...
 
@@ -56,6 +57,11 @@ dtparam=pwr_led_trigger=heartbeat
 ```bash
 sudo reboot
 ```
+
+
+## ctrl+Cやctrl+Zのコマンド操作を検知
+
+[Cで強制終了を回避(出来るだけ)](https://qiita.com/Ki4mTaria/items/838f81d3eecd5cc7d91e)
 
 
 ## ROS ノードをすべて終了するとき
