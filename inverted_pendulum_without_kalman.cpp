@@ -569,6 +569,8 @@ int main()
     std::signal(SIGINT, signalHandler);
     // Ctrl+Z
     std::signal(SIGTSTP, signalHandler);
+    // kill pid
+    std::signal(SIGTERM, signalHandler);
 
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
