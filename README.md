@@ -64,6 +64,23 @@ sudo reboot
 [Cで強制終了を回避(出来るだけ)](https://qiita.com/Ki4mTaria/items/838f81d3eecd5cc7d91e)
 
 
+## コマンド履歴
+```bash
+history
+```
+
+## C++コードのプロセスを終了
+
+```bash
+# 実行
+sudo /home/ubuntu/PENDULUM
+
+# 終了
+ps aux | grep PENDULUM
+sudo killall -9 PENDULUM
+sudo /home/ubuntu/PENDULUM_CLEANUP
+```
+
 ## ROS ノードをすべて終了するとき
 
 - `grep ros`で ros のプロセスを検索
