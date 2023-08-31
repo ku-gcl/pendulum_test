@@ -2,6 +2,7 @@ import time
 import RPi.GPIO as GPIO
 import os
 import subprocess
+import signal
 
 GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)
@@ -42,8 +43,16 @@ while True:
                     ABORT_CMD1 = "ps aux | grep ros | grep -v grep | awk '{ print \"kill -9\", $2 }' | sh"
                     ABORT_CMD2 = "g++ -o /home/ubuntu/PENDULUM_CLEANUP /home/ubuntu/pendulum_project/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt"
                     ABORT_CMD3 = "sudo /home/ubuntu/PENDULUM_CLEANUP"
-                    subprocess.run(ABORT_CMD1, shell=True)
-                    subprocess.run(ABORT_CMD2, shell=True)
+                    
+                    # 実行したプロセスを終了
+                    # exec_process.terminate()
+                    exec_process.kill()
+                    # subprocess.run(ABORT_CMD1, shell=True)
+                    # subprocess.run(ABORT_CMD2, shell=True)
+                    # os.kill(exec_process.pid, signal.CTRL_C_EVENT)
+                    
+                    KILL_CMD = "sudo killall -9 PENDULUM"
+                    subprocess.run(KILL_CMD, shell=True)
                     subprocess.run(ABORT_CMD3, shell=True)
                     print("-------Control END------\n")
                     CODE_EXEC_FLAG = False
@@ -60,7 +69,8 @@ while True:
                 EXEC_CMD = "sudo /home/ubuntu/PENDULUM"
                 subprocess.run(COMPILE_CMD, shell=True)
                 # C++コードをバックグラウンドで実行。そのためにsubprocess.Popenを使用
-                subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                exec_process = subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print(exec_process.pid)
                 
                 print("-------Control Executed------\n")
                 CODE_EXEC_FLAG = True
