@@ -61,6 +61,7 @@ while True:
                 # 制御プログラムを開始する
                 print("-------Control START------\n")
                 # プログラムのコンパイルコマンド
+                # g++ -o /home/ubuntu/PENDULUM /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread
                 COMPILE_CMD = "g++ -o /home/ubuntu/PENDULUM \
                                 /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp \
                                 -lpigpiod_if2 -lrt -pthread"

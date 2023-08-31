@@ -32,7 +32,7 @@ const int LED_G = 27;
 //=========================================================
 // Accelerometer and gyro statistical data
 int sample_num = 100;
-float meas_interval = 0.01;
+float meas_interval = 10000;    // us micro seconds
 float theta_mean;
 float theta_variance;
 float theta_dot_mean;
@@ -336,7 +336,7 @@ void acc_init(int bus)
     for (int i = 0; i < sample_num; i++)
     {
         theta_array[i] = get_acc_data(bus);
-        sleep(meas_interval);
+        usleep(meas_interval);
     }
 
     // calculate mean
@@ -393,7 +393,7 @@ void gyr_init(int bus)
     for (int i = 0; i < sample_num; i++)
     {
         theta_dot_array[i] = get_gyr_data(bus);
-        sleep(meas_interval);
+        usleep(meas_interval);
     }
 
     // calculate mean
