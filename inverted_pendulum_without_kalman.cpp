@@ -498,10 +498,31 @@ void update_theta(int bus_acc, int bus_gyr)
 
 // シグナルハンドラ関数
 void signalHandler(int signal) {
-    std::cout << "Ctrl+Cが押されました。終了します。" << std::endl;
+    const char* key;
+    if (signal == SIGINT) 
+    {
+        key = "C";
+    } else if(signal == SIGTSTP) 
+    {
+        key = "Z";
+    } else 
+    {
+        key = "Unknown";
+    }
+
+    char message[100];
+    std::sprintf(message, "Ctrl+%sが押されました。終了します。", key);
+    std::cout << message << std::endl;
     // ここに中断時に実行したい処理を追加
 
     // ***** motor driver cleanup *****
+    pi = pigpio_start(NULL, NULL);
+    set_mode(pi, LED_R, PI_OUTPUT);
+    set_mode(pi, LED_Y, PI_OUTPUT);
+    set_mode(pi, LED_G, PI_OUTPUT);
+    set_mode(pi, IN1, PI_OUTPUT);
+    set_mode(pi, IN2, PI_OUTPUT);
+
     gpio_write(pi, IN1, 0);
     gpio_write(pi, IN2, 0);
 
@@ -532,6 +553,8 @@ int main()
 {
     // Ctrl+Cによる中断をキャッチするためのシグナルハンドラを設定
     std::signal(SIGINT, signalHandler);
+    // Ctrl+Z
+    std::signal(SIGTSTP, signalHandler);
 
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
