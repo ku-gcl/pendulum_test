@@ -28,7 +28,7 @@ source ./cleanup.sh
 ## ボタン用のスクリプトを実行
 
 ```bash
-python3 /home/ubuntu/pendulum_project/pendulum_test/shutdown.py
+python3 /home/ubuntu/pendulum_project/pendulum_test/pendulum_auto_start_script.py
 ```
 
 `python`ではなく、`python3`を使用すること。

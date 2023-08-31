@@ -35,15 +35,22 @@ while True:
         if sw_status1 == 1 and sw_status2 == 0:
             sw_counter2 = sw_counter2 + 1
             if sw_counter2 >= 20:
-                print("セイギョカイシ")
-                # os.system("sudo ")
+                print("-------Control START------")
+                # プログラムのコンパイルコマンド
+                COMPILE_CMD = "g++ -o /home/ubuntu/pendulum \
+                                /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp \
+                                -lpigpiod_if2 -lrt -pthread"
+                # プログラムの実行コマンド
+                EXEC_CMD = "sudo /home/ubuntu/pendulum"
+                os.system(COMPILE_CMD)
+                os.system(EXEC_CMD)
                 break
                 
         # shutdown
         elif sw_status1 == 0 and sw_status2 == 0:
             sw_counter1 = sw_counter1 + 1
             if sw_counter1 >= 50:
-                print("オヤスミ")
+                print("-------SHUTDOWN------")
                 os.system("sudo shutdown -h now")
                 break
 
@@ -51,7 +58,7 @@ while True:
         else:
             sw_counter1 = 0
             sw_counter2 = 0
-            print("チラ")
+            print("-------WAIT FOR ACTION------")
             GPIO.wait_for_edge(pin2, GPIO.FALLING)
             
 
