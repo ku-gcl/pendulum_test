@@ -4,6 +4,9 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+// for detect ctrol+c
+#include <csignal>
+#include <cstdlib>
 
 std::thread thread1;
 std::thread thread2;
@@ -493,11 +496,43 @@ void update_theta(int bus_acc, int bus_gyr)
     std::this_thread::sleep_for(dura2);
 }
 
+// シグナルハンドラ関数
+void signalHandler(int signal) {
+    std::cout << "Ctrl+Cが押されました。終了します。" << std::endl;
+    // ここに中断時に実行したい処理を追加
+
+    // ***** motor driver cleanup *****
+    gpio_write(pi, IN1, 0);
+    gpio_write(pi, IN2, 0);
+
+    gpio_write(pi, LED_R, 0);
+    gpio_write(pi, LED_Y, 0);
+    gpio_write(pi, LED_G, 0);
+
+    sleep(1);
+    gpio_write(pi, LED_R, 1);
+    sleep(1);
+    gpio_write(pi, LED_G, 1);
+    sleep(1);
+    gpio_write(pi, LED_Y, 1);
+    sleep(1);
+    gpio_write(pi, LED_R, 0);
+    gpio_write(pi, LED_Y, 0);
+    gpio_write(pi, LED_G, 0);   
+
+    pigpio_stop(pi);
+
+    std::exit(signal); // プログラムを終了
+}
+
 //=========================================================
 // Main
 //=========================================================
 int main()
 {
+    // Ctrl+Cによる中断をキャッチするためのシグナルハンドラを設定
+    std::signal(SIGINT, signalHandler);
+
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     int bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
@@ -793,4 +828,5 @@ int main()
     //======10000//=====================================
     // Main loop (end)
     //===========================================
+    return 0;
 }

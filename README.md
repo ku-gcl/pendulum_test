@@ -21,6 +21,8 @@ sudo ./driver_test
 ```bash
 g++ -o pendulum inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread
 sudo ./pendulum
+
+source ./cleanup.sh
 ```
 
 ## ボタン用のスクリプトを実行
@@ -31,6 +33,30 @@ python3 /home/ubuntu/pendulum_project/pendulum_test/shutdown.py
 
 `python`ではなく、`python3`を使用すること。
 `python`を使うと、GPIO ピンの ON/OFF が動作しなくなる。
+
+
+## 電源ライトを点滅させる
+
+```bash
+sudo nano /boot/firmware/config.txt
+```
+
+```txt
+# config.txt
+
+...
+
+# turn power LED into heartbeat
+dtparam=pwr_led_trigger=heartbeat
+
+```
+
+再起動
+
+```bash
+sudo reboot
+```
+
 
 ## ROS ノードをすべて終了するとき
 
