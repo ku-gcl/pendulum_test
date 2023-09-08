@@ -142,6 +142,20 @@ Type=forking
 WantedBy=multi-user.target
 ```
 
+```
+[Unit]
+Description=Execution pendulum auto start script
+# After=network.target <-- 不要
+
+[Service]
+ExecStart=/usr/bin/python3 pendulum_auto_start_script.py
+WorkingDirectory=/home/ubuntu/pendulum_project/pendulum_test
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
 ```bash
 sudo killall pigpiod
 sudo systemctl status pigpiod
