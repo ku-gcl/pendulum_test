@@ -7,6 +7,7 @@
 // for detect ctrol+c
 #include <csignal>
 #include <cstdlib>
+#include "matrix_operations.h"
 
 std::thread thread1;
 std::thread thread2;
