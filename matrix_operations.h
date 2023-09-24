@@ -2,6 +2,8 @@
 
 #ifndef MATRIX_OPERATIONS_H
 #define MATRIX_OPERATIONS_H
+// #include <cstdlib>
+
 
 //=========================================================
 // Matrix common functions

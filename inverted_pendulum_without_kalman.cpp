@@ -8,10 +8,10 @@
 #include <csignal>
 #include <cstdlib>
 
-// To use matrix_operations header file, you should add "-lmatrix_operations" option
-// to compile command.
-// e.g., "g++ -o pendulum inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread -lmatrix_operations"
 #include "matrix_operations.h"
+#include "sensor.h"
+#include "signal_handler.h"
+
 
 std::thread thread1;
 std::thread thread2;
@@ -20,19 +20,19 @@ int update_theta_syn_flag = 1;
 
 //=========================================================
 // Port Setting
-int pi;
+extern int pi;
 const int ACC_ADDR = 0x19;
 const int GYR_ADDR = 0x69;
 const int pin1 = 24; // to A
 const int pin2 = 23; // to B
 
-const int IN1 = 6;  // Motor driver input 1
-const int IN2 = 5;  // Motor driver input 2
+extern const int IN1 = 6;  // Motor driver input 1
+extern const int IN2 = 5;  // Motor driver input 2
 const int PWM = 12; // Motor driver PWM input
 
-const int LED_Y = 17;
-const int LED_R = 22;
-const int LED_G = 27;
+extern const int LED_Y = 17;
+extern const int LED_R = 22;
+extern const int LED_G = 27;
 
 //=========================================================
 // Accelerometer and gyro statistical data
@@ -132,125 +132,6 @@ float motor_offset = 0.17; // volt
 
 float Gain[4] = {29.30755259, 4.80340051, 0.02968736, 0.3196894};
 
-//=========================================================
-// Accelerometer (BMX055)
-//=========================================================
-// get data
-float get_acc_data(int bus)
-{
-    unsigned char data[4];
-    i2c_read_i2c_block_data(pi, bus, 0x04, (char *)data, 4);
-
-    int y_data = ((data[0] & 0xF0) + (data[1] * 256)) / 16;
-    if (y_data > 2047)
-    {
-        y_data -= 4096;
-    }
-
-    int z_data = ((data[2] & 0xF0) + (data[3] * 256)) / 16;
-    if (z_data > 2047)
-    {
-        z_data -= 4096;
-    }
-
-    float theta1_deg = atan2(float(z_data), float(y_data)) * 57.29578f;
-    return theta1_deg;
-}
-
-// statistical data of accelerometer
-void acc_init(int bus)
-{
-    // initialize ACC register 0x0F (range)
-    // Full scale = +/- 2 G
-    i2c_write_byte_data(pi, bus, 0x0F, 0x03);
-    // initialize ACC register 0x10 (band width)
-    // Filter bandwidth = 1000 Hz
-    i2c_write_byte_data(pi, bus, 0x10, 0x0F);
-
-    // get data
-    float theta_array[sample_num];
-    for (int i = 0; i < sample_num; i++)
-    {
-        theta_array[i] = get_acc_data(bus);
-        usleep(meas_interval);
-    }
-
-    // calculate mean
-    theta_mean = 0;
-    for (int i = 0; i < sample_num; i++)
-    {
-        theta_mean += theta_array[i];
-    }
-    theta_mean /= sample_num;
-
-    // calculate variance
-    float temp;
-    theta_variance = 0;
-    for (int i = 0; i < sample_num; i++)
-    {
-        temp = theta_array[i] - theta_mean;
-        theta_variance += temp * temp;
-    }
-    theta_variance /= sample_num;
-    return;
-}
-
-//=========================================================
-// Gyroscope (BMX055)
-//=========================================================
-// get data
-float get_gyr_data(int bus)
-{
-    unsigned char data[2];
-    i2c_read_i2c_block_data(pi, bus, 0x02, (char *)data, 2);
-
-    int theta1_dot = data[0] + 256 * data[1];
-    if (theta1_dot > 32767)
-    {
-        theta1_dot -= 65536;
-    }
-    theta1_dot = -1 * theta1_dot; // !caution!
-    // +1000 (deg/sec) / 2^15 = 0.0305176
-    return float(theta1_dot) * 0.0305176f;
-}
-
-// statistical data of gyro
-void gyr_init(int bus)
-{
-    // initialize Gyro register 0x0F (range)
-    // Full scale = +/- 1000 deg/s
-    i2c_write_byte_data(pi, bus, 0x0F, 0x01);
-    // initialize Gyro register 0x10 (band width)
-    // Data rate = 1000 Hz, Filter bandwidth = 116 Hz
-    i2c_write_byte_data(pi, bus, 0x10, 0x02);
-
-    // get data
-    float theta_dot_array[sample_num];
-    for (int i = 0; i < sample_num; i++)
-    {
-        theta_dot_array[i] = get_gyr_data(bus);
-        usleep(meas_interval);
-    }
-
-    // calculate mean
-    theta_dot_mean = 0;
-    for (int i = 0; i < sample_num; i++)
-    {
-        theta_dot_mean += theta_dot_array[i];
-    }
-    theta_dot_mean /= sample_num;
-
-    // calculate variance
-    float temp;
-    theta_dot_variance = 0;
-    for (int i = 0; i < sample_num; i++)
-    {
-        temp = theta_dot_array[i] - theta_dot_mean;
-        theta_dot_variance += temp * temp;
-    }
-    theta_dot_variance /= sample_num;
-    return;
-}
 
 //=========================================================
 // Rotary encoder polling function
@@ -286,10 +167,10 @@ void update_theta(int bus_acc, int bus_gyr)
     enc_syn = 0;
 
     // measurement data
-    float y = get_acc_data(bus_acc); // degree
+    float y = get_acc_data(pi, bus_acc); // degree
 
     // input data
-    float theta_dot_gyro = get_gyr_data(bus_gyr); // degree/sec
+    float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
 
     // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
     float P_CT[2][1] = {};
@@ -346,56 +227,6 @@ void update_theta(int bus_acc, int bus_gyr)
     std::this_thread::sleep_for(dura2);
 }
 
-// シグナルハンドラ関数
-void signalHandler(int signal) {
-    const char* key;
-    if (signal == SIGINT) 
-    {
-        key = "C";
-    } else if(signal == SIGTSTP) 
-    {
-        key = "Z";
-    } else 
-    {
-        key = "Unknown";
-    }
-
-    char message[100];
-    std::sprintf(message, "Ctrl+%sが押されました。終了します。", key);
-    std::cout << message << std::endl;
-    // ここに中断時に実行したい処理を追加
-
-    // ***** motor driver cleanup *****
-    pi = pigpio_start(NULL, NULL);
-    set_mode(pi, LED_R, PI_OUTPUT);
-    set_mode(pi, LED_Y, PI_OUTPUT);
-    set_mode(pi, LED_G, PI_OUTPUT);
-    set_mode(pi, IN1, PI_OUTPUT);
-    set_mode(pi, IN2, PI_OUTPUT);
-
-    gpio_write(pi, IN1, 0);
-    gpio_write(pi, IN2, 0);
-
-    gpio_write(pi, LED_R, 0);
-    gpio_write(pi, LED_Y, 0);
-    gpio_write(pi, LED_G, 0);
-
-    sleep(1);
-    gpio_write(pi, LED_R, 1);
-    sleep(1);
-    gpio_write(pi, LED_G, 1);
-    sleep(1);
-    gpio_write(pi, LED_Y, 1);
-    sleep(1);
-    gpio_write(pi, LED_R, 0);
-    gpio_write(pi, LED_Y, 0);
-    gpio_write(pi, LED_G, 0);   
-
-    pigpio_stop(pi);
-
-    std::exit(signal); // プログラムを終了
-}
-
 //=========================================================
 // Main
 //=========================================================
@@ -431,8 +262,8 @@ int main()
     //-------------------------------------------
     // Accelerometer & Gyro initialization
     //-------------------------------------------
-    acc_init(bus_acc);
-    gyr_init(bus_gyr);
+    acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean, theta_variance);
+    gyr_init(pi, bus_gyr, sample_num, meas_interval, theta_dot_mean, theta_dot_variance);
 
     //-------------------------------------------
     // Rotary encoder initialization
@@ -570,7 +401,7 @@ int main()
         //---------------------------------------
         // measurement data
         y[0][0] = theta_data[0][0] * 3.14f / 180;
-        theta1_dot_temp = get_gyr_data(bus_gyr);
+        theta1_dot_temp = get_gyr_data(pi, bus_gyr);
         y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;
         y[2][0] = encoder_value * (2 * 3.14f) / (4 * rotary_encoder_resolution);
         y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;
