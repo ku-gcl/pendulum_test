@@ -255,7 +255,7 @@ void csv_wirte(){
     while(!stopThread_csv){
         csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << std::endl;
         time_csv=time_csv+10; //msec
-        std::chrono::microseconds dura2(10);
+        std::chrono::microseconds dura2(100);
         std::this_thread::sleep_for(dura2);
     }
 }
