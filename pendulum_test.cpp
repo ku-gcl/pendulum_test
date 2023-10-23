@@ -72,7 +72,7 @@ float pre_theta2 = 0;
 // Update rate
 float theta_update_freq = 400; // Hz
 float theta_update_interval = 1.0f / theta_update_freq;
-int th1_dura = 2500 / theta_update_freq; 
+int th1_dura = 2500; 
 // State vector
 //[[theta(degree)], [offset of theta_dot(degree/sec)]]
 float theta_data_predict[2][1];
@@ -255,8 +255,8 @@ void csv_wirte(){
     while(!stopThread_csv){
         csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << std::endl;
         time_csv=time_csv+10; //msec
-        std::chrono::microseconds dura2(100);
-        std::this_thread::sleep_for(dura2);
+        std::chrono::milliseconds dura_csv(100);
+        std::this_thread::sleep_for(dura_csv);
     }
 }
 
