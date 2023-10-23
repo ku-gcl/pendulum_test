@@ -1,6 +1,9 @@
+// compile "g++ -o pendulum_test pendulum_test.cpp -pthread -lpigpiod_if2 -lrt"
+
 #include "pigpiod_if2.h"
 #include <cmath>
 #include <unistd.h>
+#include <fstream>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -13,10 +16,23 @@
 
 std::thread thread1;
 std::thread thread2;
+std::thread thread_csv;
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
 bool stopThread1 = false;
 bool stopThread2 = false;
+bool stopThread_csv = false;
+
+
+std::ofstream csvFile;
+float time_csv=0;
+float theta1_csv=0;
+float theta2_csv=0;
+float theta1dot_csv=0;
+
+float theta1_kalman_csv=0;
+float theta2_kalman_csv=0;
+float theta1dot_kalman_csv=0;
 
 //=========================================================
 // Port Setting
@@ -148,12 +164,7 @@ void rotary_encoder()
         // update the encoder value
         int value = -1 * table[code];
         encoder_value += value;
-       
-        //float yy;
-        //yy = (encoder_value * 3.1415f) / 200;
-        //std::cout << "theta2: " << yy << std::endl;
-        // std::cout << "rot_enc"  << std::endl;
-        
+        theta2_csv = encoder_value * (3.14f / 200);
         std::chrono::microseconds dura1(rotary_encoder_update_rate);
         std::this_thread::sleep_for(dura1);
     }else{}
@@ -174,9 +185,11 @@ void update_theta(int bus_acc, int bus_gyr)
 
     // measurement data
     float y = get_acc_data(pi, bus_acc); // degree
+    theta1_csv=y* 3.14f / 180;
 
     // input data
     float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
+    theta1dot_csv=theta_dot_gyro* 3.14f / 180;
 
     // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
     float P_CT[2][1] = {};
@@ -238,11 +251,46 @@ void update_theta(int bus_acc, int bus_gyr)
   }
 }
 
+void csv_wirte(){
+    while(!stopThread_csv){
+        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << std::endl;
+        time_csv=time_csv+10; //msec
+        std::chrono::microseconds dura2(10);
+        std::this_thread::sleep_for(dura2);
+    }
+}
+
+void signalHandler(int signum) {
+    if (signum == SIGINT) {
+        std::cout << "Ctrl+Cが検出されました。スレッドを終了し、ファイルを閉じます。" << std::endl;
+        stopThread1 = true;
+        stopThread2 = true;
+        thread1.join();
+        thread2.join();
+        set_mode(pi, LED_R, PI_OUTPUT);
+        set_mode(pi, LED_Y, PI_OUTPUT);
+        set_mode(pi, LED_G, PI_OUTPUT);
+        set_mode(pi, IN1, PI_OUTPUT);
+        set_mode(pi, IN2, PI_OUTPUT);
+        gpio_write(pi, IN1, 0);
+        gpio_write(pi, IN2, 0);
+        gpio_write(pi, LED_R, 0);
+        gpio_write(pi, LED_Y, 0);
+        gpio_write(pi, LED_G, 0);
+        csvFile.close();
+        pigpio_stop(pi);
+        exit(signum);
+    }
+}
+
 //=========================================================
 // Main
 //=========================================================
 int main()
 {
+    csvFile.open("output.csv"); // ファイルを開く
+    std::signal(SIGINT, signalHandler);
+    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << std::endl;
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     int bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
@@ -377,8 +425,10 @@ int main()
     //-------------------------------------------
     thread1 = std::thread(rotary_encoder);
     thread2 = std::thread(update_theta, bus_acc, bus_gyr);
+    thread_csv = std::thread(csv_wirte);
     thread1.detach();
     thread2.detach();
+    thread_csv.detach();
 
     //-------------------------------------------
     // initialization done
@@ -537,6 +587,7 @@ int main()
         std::chrono::microseconds dura3(feedback_rate);
         std::this_thread::sleep_for(dura3);
     }
+    csvFile.close();
     //======10000//=====================================
     // Main loop (end)
     //===========================================
