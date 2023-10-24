@@ -119,7 +119,8 @@ float voltage_variance = voltage_error * voltage_error;
 
 //=========================================================
 // Motor control variables
-int feedback_rate = 10000; // 0.01; //sec
+float feedback_rate = 0.01; //sec
+int feedback_dura = 10; //msec
 float motor_value = 0;
 int pwm_duty = 0;
 int motor_direction = 1;
@@ -526,7 +527,7 @@ int main()
         // start the angle update process
         update_theta_syn_flag = 1;
         // wait
-        std::chrono::microseconds dura3(feedback_rate);
+        std::chrono::milliseconds dura3(feedback_dura);
         std::this_thread::sleep_for(dura3);
     }
     //======10000//=====================================
