@@ -34,6 +34,8 @@ float theta1_kalman_csv=0;
 float theta2_kalman_csv=0;
 float theta1dot_kalman_csv=0;
 
+float motor_csv;
+
 //=========================================================
 // Port Setting
 int pi;
@@ -136,7 +138,7 @@ float voltage_variance = voltage_error * voltage_error;
 //=========================================================
 // Motor control variables
 float feedback_rate = 0.01; 
-int feedback_dura = 10000; //msec
+int feedback_dura = 10000; //usec
 float motor_value = 0;
 int pwm_duty = 0;
 int motor_direction = 1;
@@ -254,7 +256,7 @@ void update_theta(int bus_acc, int bus_gyr)
 
 void csv_wirte(){
     while(!stopThread_csv){
-        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta1_kalman_csv << "," << theta2_kalman_csv << "," << theta1dot_kalman_csv << "," << pwm_duty << std::endl;
+        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta1_kalman_csv << "," << theta2_kalman_csv << "," << theta1dot_kalman_csv << "," << motor_csv << std::endl;
         time_csv=time_csv+10; //msec
         std::chrono::milliseconds dura_csv(100);
         std::this_thread::sleep_for(dura_csv);
@@ -517,7 +519,7 @@ int main()
         {
             motor_value += Gain[i] * x_data[i][0];
         }
-
+        motor_csv = motor_value;
         // offset
         if (motor_value > 0)
         {
