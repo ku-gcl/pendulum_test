@@ -48,9 +48,9 @@ const int IN1 = 6;  // Motor driver input 1
 const int IN2 = 5;  // Motor driver input 2
 const int PWM = 12; // Motor driver PWM input
 
-const int LED_Y = 17;
-const int LED_R = 22;
-const int LED_G = 27;
+const int LED_R = 17;
+const int LED_Y = 27;
+const int LED_G = 22;
 
 //=========================================================
 // Accelerometer and gyro statistical data
@@ -111,16 +111,17 @@ float P_x[4][4];
 //     {1.81472e-03},
 //     {3.59797e-01}};
 
-float A_x[4][4] = {
-    { 1.00195470e+00, 1.00065176e-02, 0.00000000e+00, 3.87492726e-05},
-    { 3.90734698e-01, 1.00195470e+00, 0.00000000e+00, 7.67670390e-03},
-    {-1.27692354e-03, -4.27676004e-06, 1.00000000e+00, 9.70978203e-03},
-    {-2.52974140e-01, -1.27692354e-03, 0.00000000e+00, 9.42521734e-01}};
-float B_x[4][1] = {
-    {-2.49159417e-04},
-    {-4.93615220e-02},
-    {1.86611351e-03},
-    {3.69587616e-01}};
+
+float A_x[4][4]=  {{1.0020824276428177, 0.01000694384099276, 0.0, 4.08544363598033e-05},
+ {0.41622688505520855, 1.0020824276428177, 0.0, 0.00809455762284398},
+ {-0.001467099554375857, -4.913480777961718e-06, 1.0, 0.009712010551520779},
+ {-0.2906788818907422, -0.001467099554375857, 0.0, 0.9429583658672117}};
+
+//matrix Bx (discrete time)
+float B_x[4][1]=  {{-0.00026269570704606055},
+ {-0.05204833862425401},
+ {0.0018517840051390114},
+ {0.3667800548661786}};
 
 //"C" of the state equation (update freq = 100 Hz)
 float C_x[4][4] = {
@@ -170,6 +171,7 @@ void rotary_encoder()
         theta2_csv = encoder_value * (3.14f / 200);
         std::chrono::microseconds dura1(rotary_encoder_update_rate);
         std::this_thread::sleep_for(dura1);
+        // std::cout << theta2_csv  << std::endl;
     }else{}
   }
 }
@@ -246,8 +248,8 @@ void update_theta(int bus_acc, int bus_gyr)
     // attach a timer for the rotary encoder (40 kHz)
     enc_syn = 1;
 
-    // std::cout << "update_theta"  << std::endl;
-
+    // std::cout << theta_data[0][0]  << std::endl;
+    
     std::chrono::microseconds dura2(th1_dura);
     std::this_thread::sleep_for(dura2);
     }else{} 
@@ -257,6 +259,7 @@ void update_theta(int bus_acc, int bus_gyr)
 void csv_wirte(){
     while(!stopThread_csv){
         csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta1_kalman_csv << "," << theta2_kalman_csv << "," << theta1dot_kalman_csv << "," << motor_csv << std::endl;
+        // std::cout << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << pwm_duty << std::endl;
         time_csv=time_csv+10; //msec
         std::chrono::milliseconds dura_csv(100);
         std::this_thread::sleep_for(dura_csv);
@@ -438,10 +441,6 @@ int main()
     // Main loop
     // it takes 700 usec (calculation)
     //===========================================
-    float start_time;
-    float end_time;
-    float elapsed_time;
-
     while (1)
     {
         // std::cout << "----mainloop----" << std::endl;
