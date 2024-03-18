@@ -20,8 +20,12 @@ std::thread thread_csv;
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
 
+bool stopThread1=false;
+bool stopThread2=false;
+bool stopThreadcsv=false;
 
 std::ofstream csvFile;
+int csv_rate = 10;
 float time_csv=0;
 float theta1_csv=0;
 float theta2_csv=0;
@@ -66,7 +70,7 @@ float pre_theta2 = 0;
 // Update rate
 float theta_update_freq = 400; // Hz
 float theta_update_interval = 1.0f / theta_update_freq;
-int th1_dura = 1000 * 1.0f / theta_update_freq;
+int th1_dura = 1000000 * 1.0f / theta_update_freq;
 // State vector
 //[[theta(degree)], [offset of theta_dot(degree/sec)]]
 float theta_data_predict[2][1];
@@ -140,17 +144,19 @@ float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.
 // It takes 4usec. (NUCLEO-F401RE 84MHz)
 //=========================================================
 void rotary_encoder(){
-    if (enc_syn == 1)
-    {
-        static int code;
-        // check the movement
-        code = ((code << 2) + (gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf; // !caution!
-        // update the encoder value
-        int value = -1 * table[code];
-        encoder_value += value;
-        std::chrono::microseconds dura1(rotary_encoder_update_rate);
-        std::this_thread::sleep_for(dura1);
-        return;
+    while(!stopThread1){
+        if (enc_syn == 1)
+        {
+            static int code;
+            // check the movement
+            code = ((code << 2) + (gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf; // !caution!
+            // update the encoder value
+            int value = -1 * table[code];
+            encoder_value += value;
+            std::chrono::microseconds dura1(rotary_encoder_update_rate);
+            std::this_thread::sleep_for(dura1);
+            return;
+        }
     }
 }
 
@@ -158,81 +164,84 @@ void rotary_encoder(){
 // Kalman filter for "theta" & "theta_dot_bias"
 // It takes 650 usec. (NUCLEO-F401RE 84MHz, BMX055)
 //=========================================================
-void update_theta(int bus_acc, int bus_gyr)
-{
-    if (update_theta_syn_flag == 0)
-    {
-        return;
+void update_theta(int bus_acc, int bus_gyr){
+    while{!stopThread2}{
+        if (update_theta_syn_flag == 1){
+            // detach the rotary encoder polling
+            enc_syn = 0;
+
+            // measurement data
+            float y = get_acc_data(pi, bus_acc); // degree
+
+            // input data
+            float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
+
+            // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
+            float P_CT[2][1] = {};
+            float tran_C_theta[2][1] = {};
+            mat_tran(C_theta[0], tran_C_theta[0], 1, 2);                       // C^T
+            mat_mul(P_theta_predict[0], tran_C_theta[0], P_CT[0], 2, 2, 2, 1); // P'C^T
+            float G_temp1[1][1] = {};
+            mat_mul(C_theta[0], P_CT[0], G_temp1[0], 1, 2, 2, 1);    // CP'C^T
+            float G_temp2 = 1.0f / (G_temp1[0][0] + theta_variance); //(W+CP'C^T)^-1
+            float G[2][1] = {};
+            mat_mul_const(P_CT[0], G_temp2, G[0], 2, 1); // P'C^T(W+CP'C^T)^-1
+
+            // theta_data estimation: theta = theta'+G(y-Ctheta')
+            float C_theta_theta[1][1] = {};
+            mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2, 2, 1); // Ctheta'
+            float delta_y = y - C_theta_theta[0][0];                                  // y-Ctheta'
+            float delta_theta[2][1] = {};
+            mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
+            mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
+
+            // calculate covariance matrix: P=(I-GC)P'
+            float GC[2][2] = {};
+            float I2[2][2] = {{1, 0}, {0, 1}};
+            mat_mul(G[0], C_theta[0], GC[0], 2, 1, 1, 2); // GC
+            float I2_GC[2][2] = {};
+            mat_sub(I2[0], GC[0], I2_GC[0], 2, 2);                         // I-GC
+            mat_mul(I2_GC[0], P_theta_predict[0], P_theta[0], 2, 2, 2, 2); //(I-GC)P'
+
+            // predict the next step data: theta'=Atheta+Bu
+            float A_theta_theta[2][1] = {};
+            float B_theta_dot[2][1] = {};
+            mat_mul(A_theta[0], theta_data[0], A_theta_theta[0], 2, 2, 2, 1);       // Atheta
+            mat_mul_const(B_theta[0], theta_dot_gyro, B_theta_dot[0], 2, 1);        // Bu
+            mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2, 1); // Atheta+Bu
+
+            // predict covariance matrix: P'=APA^T + BUB^T
+            float AP[2][2] = {};
+            float APAT[2][2] = {};
+            float tran_A_theta[2][2] = {};
+            mat_tran(A_theta[0], tran_A_theta[0], 2, 2);          // A^T
+            mat_mul(A_theta[0], P_theta[0], AP[0], 2, 2, 2, 2);   // AP
+            mat_mul(AP[0], tran_A_theta[0], APAT[0], 2, 2, 2, 2); // APA^T
+            float BBT[2][2];
+            float tran_B_theta[1][2] = {};
+            mat_tran(B_theta[0], tran_B_theta[0], 2, 1);              // B^T
+            mat_mul(B_theta[0], tran_B_theta[0], BBT[0], 2, 1, 1, 2); // BB^T
+            float BUBT[2][2] = {};
+            mat_mul_const(BBT[0], theta_dot_variance, BUBT[0], 2, 2); // BUB^T
+            mat_add(APAT[0], BUBT[0], P_theta_predict[0], 2, 2);      // APA^T+BUB^T
+
+            // attach a timer for the rotary encoder (40 kHz)
+            enc_syn = 1;
+            std::chrono::microseconds dura2(th1_dura);
+            std::this_thread::sleep_for(dura2);
+        }
     }
-    // detach the rotary encoder polling
-    enc_syn = 0;
-
-    // measurement data
-    float y = get_acc_data(pi, bus_acc); // degree
-
-    // input data
-    float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
-
-    // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
-    float P_CT[2][1] = {};
-    float tran_C_theta[2][1] = {};
-    mat_tran(C_theta[0], tran_C_theta[0], 1, 2);                       // C^T
-    mat_mul(P_theta_predict[0], tran_C_theta[0], P_CT[0], 2, 2, 2, 1); // P'C^T
-    float G_temp1[1][1] = {};
-    mat_mul(C_theta[0], P_CT[0], G_temp1[0], 1, 2, 2, 1);    // CP'C^T
-    float G_temp2 = 1.0f / (G_temp1[0][0] + theta_variance); //(W+CP'C^T)^-1
-    float G[2][1] = {};
-    mat_mul_const(P_CT[0], G_temp2, G[0], 2, 1); // P'C^T(W+CP'C^T)^-1
-
-    // theta_data estimation: theta = theta'+G(y-Ctheta')
-    float C_theta_theta[1][1] = {};
-    mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2, 2, 1); // Ctheta'
-    float delta_y = y - C_theta_theta[0][0];                                  // y-Ctheta'
-    float delta_theta[2][1] = {};
-    mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
-    mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
-
-    // calculate covariance matrix: P=(I-GC)P'
-    float GC[2][2] = {};
-    float I2[2][2] = {{1, 0}, {0, 1}};
-    mat_mul(G[0], C_theta[0], GC[0], 2, 1, 1, 2); // GC
-    float I2_GC[2][2] = {};
-    mat_sub(I2[0], GC[0], I2_GC[0], 2, 2);                         // I-GC
-    mat_mul(I2_GC[0], P_theta_predict[0], P_theta[0], 2, 2, 2, 2); //(I-GC)P'
-
-    // predict the next step data: theta'=Atheta+Bu
-    float A_theta_theta[2][1] = {};
-    float B_theta_dot[2][1] = {};
-    mat_mul(A_theta[0], theta_data[0], A_theta_theta[0], 2, 2, 2, 1);       // Atheta
-    mat_mul_const(B_theta[0], theta_dot_gyro, B_theta_dot[0], 2, 1);        // Bu
-    mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2, 1); // Atheta+Bu
-
-    // predict covariance matrix: P'=APA^T + BUB^T
-    float AP[2][2] = {};
-    float APAT[2][2] = {};
-    float tran_A_theta[2][2] = {};
-    mat_tran(A_theta[0], tran_A_theta[0], 2, 2);          // A^T
-    mat_mul(A_theta[0], P_theta[0], AP[0], 2, 2, 2, 2);   // AP
-    mat_mul(AP[0], tran_A_theta[0], APAT[0], 2, 2, 2, 2); // APA^T
-    float BBT[2][2];
-    float tran_B_theta[1][2] = {};
-    mat_tran(B_theta[0], tran_B_theta[0], 2, 1);              // B^T
-    mat_mul(B_theta[0], tran_B_theta[0], BBT[0], 2, 1, 1, 2); // BB^T
-    float BUBT[2][2] = {};
-    mat_mul_const(BBT[0], theta_dot_variance, BUBT[0], 2, 2); // BUB^T
-    mat_add(APAT[0], BUBT[0], P_theta_predict[0], 2, 2);      // APA^T+BUB^T
-
-    // attach a timer for the rotary encoder (40 kHz)
-    enc_syn = 1;
-    std::chrono::milliseconds dura2(th1_dura);
-    std::this_thread::sleep_for(dura2);
 }
 
 void csv_write(){
-    csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
-    time_csv=time_csv+10; //msec
-    std::chrono::milliseconds dura_csv(10);
-    std::this_thread::sleep_for(dura_csv);
+    while(!stopThreadcsv){
+        // csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+        std::cout << "CSVに書き込みました" << std::endl;
+        
+        time_csv=time_csv+10; //msec
+        std::chrono::milliseconds dura_csv(csv_rate);
+        std::this_thread::sleep_for(dura_csv);
+    }
 }
 
 void signalHandler(int signum) {
@@ -262,6 +271,8 @@ int main()
     csvFile.open("output.csv"); // ファイルを開く
     std::signal(SIGINT, signalHandler);
     csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
+    thread_csv = std::thread(csv_write);
+    
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     int bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
@@ -395,11 +406,7 @@ int main()
     // Timer
     //-------------------------------------------
     thread1 = std::thread(rotary_encoder);
-    thread2 = std::thread(update_theta, bus_acc, bus_gyr);
-    thread_csv = std::thread(csv_write);
-    thread1.join();
-    thread2.join();
-    thread_csv.join();
+    thread2 = std::thread(update_theta, bus_acc, bus_gyr);    
 
     //-------------------------------------------
     // initialization done
@@ -444,6 +451,10 @@ int main()
         mat_sub(y[0], C_x_x[0], delta_y[0], 4, 1);                // y-Cx'
         mat_mul(G[0], delta_y[0], delta_x[0], 4, 4, 4, 1);        // G(y-Cx')
         mat_add(x_data_predict[0], delta_x[0], x_data[0], 4, 1);  // x'+G(y-Cx')
+        theta1_csv=x_data[0][0];
+        theta2_csv=x_data[1][0];
+        theta1dot_csv=x_data[2][0];
+        theta2dot_csv=x_data[3][0];
         
         // calculate covariance matrix: P=(I-GC)P'
         mat_mul(G[0], C_x[0], GC[0], 4, 4, 4, 4);              // GC

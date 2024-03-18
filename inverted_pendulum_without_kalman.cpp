@@ -56,7 +56,7 @@ float pre_theta2 = 0;
 // Update rate
 float theta_update_freq = 400; // Hz
 float theta_update_interval = 1.0f / theta_update_freq;
-int th1_dura = 1000 * 1.0f / theta_update_freq;
+int th1_dura = 1000000 * 1.0f / theta_update_freq;
 // State vector
 //[[theta(degree)], [offset of theta_dot(degree/sec)]]
 float theta_data_predict[2][1];
@@ -213,7 +213,7 @@ void update_theta(int bus_acc, int bus_gyr)
 
     // attach a timer for the rotary encoder (40 kHz)
     enc_syn = 1;
-    std::chrono::milliseconds dura2(th1_dura);
+    std::chrono::microseconds dura2(th1_dura);
     std::this_thread::sleep_for(dura2);
 }
 
