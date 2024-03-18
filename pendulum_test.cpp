@@ -19,9 +19,6 @@ std::thread thread2;
 std::thread thread_csv;
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
-bool stopThread1 = false;
-bool stopThread2 = false;
-bool stopThread_csv = false;
 
 
 std::ofstream csvFile;
@@ -29,12 +26,7 @@ float time_csv=0;
 float theta1_csv=0;
 float theta2_csv=0;
 float theta1dot_csv=0;
-
-float theta1_kalman_csv=0;
-float theta2_kalman_csv=0;
-float theta1dot_kalman_csv=0;
-
-float motor_csv;
+float theta2dot_csv=0;
 
 //=========================================================
 // Port Setting
@@ -74,7 +66,7 @@ float pre_theta2 = 0;
 // Update rate
 float theta_update_freq = 400; // Hz
 float theta_update_interval = 1.0f / theta_update_freq;
-int th1_dura = 2500; // usec
+int th1_dura = 1000 * 1.0f / theta_update_freq;
 // State vector
 //[[theta(degree)], [offset of theta_dot(degree/sec)]]
 float theta_data_predict[2][1];
@@ -98,30 +90,20 @@ float x_data[4][1];
 // Covariance matrix
 float P_x_predict[4][4];
 float P_x[4][4];
+
 //"A" of the state equation (update freq = 100 Hz)
-// float A_x[4][4] = {
-//     {1.00210e+00, 1.00070e-02, 0.00000e+00, 3.86060e-05},
-//     {4.20288e-01, 1.00210e+00, 0.00000e+00, 7.65676e-03},
-//     {-1.15751e-03, -3.87467e-06, 1.00000e+00, 9.74129e-03},
-//     {-2.29569e-01, -1.15751e-03, 0.00000e+00, 9.48707e-01}};
 //"B" of the state equation (update freq = 100 Hz)
-// float B_x[4][1] = {
-//     {-2.70805e-04},
-//     {-5.37090e-02},
-//     {1.81472e-03},
-//     {3.59797e-01}};
-
-
-float A_x[4][4]=  {{1.0020824276428177, 0.01000694384099276, 0.0, 4.08544363598033e-05},
- {0.41622688505520855, 1.0020824276428177, 0.0, 0.00809455762284398},
- {-0.001467099554375857, -4.913480777961718e-06, 1.0, 0.009712010551520779},
- {-0.2906788818907422, -0.001467099554375857, 0.0, 0.9429583658672117}};
+//matrix Ax (discrete time)
+float A_x[4][4]=  {{1.0022261662585084, 0.010007423157527657, 0.0, 4.465092819988847e-05},
+ {0.4449564215185254, 1.0022261662585084, 0.0, 0.008846819829339195},
+ {-0.0014716701781144724, -4.9287847971381375e-06, 1.0, 0.009711484266907367},
+ {-0.2915863440890973, -0.0014716701781144724, 0.0, 0.9428549643835731}};
 
 //matrix Bx (discrete time)
-float B_x[4][1]=  {{-0.00026269570704606055},
- {-0.05204833862425401},
- {0.0018517840051390114},
- {0.3667800548661786}};
+float B_x[4][1]=  {{-0.0002871073058120404},
+ {-0.05688541556931065},
+ {0.0018551680368610664},
+ {0.36744493066118095}};
 
 //"C" of the state equation (update freq = 100 Hz)
 float C_x[4][4] = {
@@ -138,8 +120,8 @@ float voltage_variance = voltage_error * voltage_error;
 
 //=========================================================
 // Motor control variables
-float feedback_rate = 0.01; 
-int feedback_dura = 10000; //usec
+float feedback_rate = 0.01; //sec
+int feedback_dura = 10; //msec
 float motor_value = 0;
 int pwm_duty = 0;
 int motor_direction = 1;
@@ -150,16 +132,14 @@ float motor_offset = 0.17; // volt
 //(R=1000, Q = diag(1, 1, 10, 10), f=100Hz)
 // float Gain[4] = {29.87522919, 4.59857246, 0.09293, 0.37006248};
 
-float Gain[4] = {29.30755259, 4.80340051, 0.02968736, 0.3196894};
+float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.3061630717935332};
 
 
 //=========================================================
 // Rotary encoder polling function
 // It takes 4usec. (NUCLEO-F401RE 84MHz)
 //=========================================================
-void rotary_encoder()
-{
-  while(!stopThread1){      
+void rotary_encoder(){
     if (enc_syn == 1)
     {
         static int code;
@@ -168,12 +148,10 @@ void rotary_encoder()
         // update the encoder value
         int value = -1 * table[code];
         encoder_value += value;
-        theta2_csv = encoder_value * (3.14f / 200);
         std::chrono::microseconds dura1(rotary_encoder_update_rate);
         std::this_thread::sleep_for(dura1);
-        // std::cout << theta2_csv  << std::endl;
-    }else{}
-  }
+        return;
+    }
 }
 
 //=========================================================
@@ -182,19 +160,18 @@ void rotary_encoder()
 //=========================================================
 void update_theta(int bus_acc, int bus_gyr)
 {
-  while(!stopThread2){
-    if (update_theta_syn_flag == 1)
+    if (update_theta_syn_flag == 0)
     {
+        return;
+    }
     // detach the rotary encoder polling
     enc_syn = 0;
 
     // measurement data
     float y = get_acc_data(pi, bus_acc); // degree
-    theta1_csv=y* 3.14f / 180;
 
     // input data
     float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
-    theta1dot_csv=theta_dot_gyro* 3.14f / 180;
 
     // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
     float P_CT[2][1] = {};
@@ -247,23 +224,15 @@ void update_theta(int bus_acc, int bus_gyr)
 
     // attach a timer for the rotary encoder (40 kHz)
     enc_syn = 1;
-
-    // std::cout << theta_data[0][0]  << std::endl;
-    
-    std::chrono::microseconds dura2(th1_dura);
+    std::chrono::milliseconds dura2(th1_dura);
     std::this_thread::sleep_for(dura2);
-    }else{} 
-  }
 }
 
-void csv_wirte(){
-    while(!stopThread_csv){
-        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta1_kalman_csv << "," << theta2_kalman_csv << "," << theta1dot_kalman_csv << "," << motor_csv << std::endl;
-        // std::cout << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << pwm_duty << std::endl;
-        time_csv=time_csv+10; //msec
-        std::chrono::milliseconds dura_csv(100);
-        std::this_thread::sleep_for(dura_csv);
-    }
+void csv_write(){
+    csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+    time_csv=time_csv+10; //msec
+    std::chrono::milliseconds dura_csv(10);
+    std::this_thread::sleep_for(dura_csv);
 }
 
 void signalHandler(int signum) {
@@ -292,7 +261,7 @@ int main()
 {
     csvFile.open("output.csv"); // ファイルを開く
     std::signal(SIGINT, signalHandler);
-    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta1_kal" << "," << "theta2_kal" << "," << "theta1dot_kal" << "," << "motor_value" << std::endl;
+    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     int bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
@@ -427,10 +396,10 @@ int main()
     //-------------------------------------------
     thread1 = std::thread(rotary_encoder);
     thread2 = std::thread(update_theta, bus_acc, bus_gyr);
-    thread_csv = std::thread(csv_wirte);
-    thread1.detach();
-    thread2.detach();
-    thread_csv.detach();
+    thread_csv = std::thread(csv_write);
+    thread1.join();
+    thread2.join();
+    thread_csv.join();
 
     //-------------------------------------------
     // initialization done
@@ -461,9 +430,6 @@ int main()
         y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;
         y[2][0] = encoder_value * (2 * 3.14f) / (4 * rotary_encoder_resolution);
         y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;
-        theta1_kalman_csv=y[0][0];
-        theta1dot_kalman_csv=y[1][0];
-        theta2_kalman_csv=y[2][0];
         
         // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
         mat_tran(C_x[0], tran_C_x[0], 4, 4);                            // C^T
@@ -518,7 +484,6 @@ int main()
         {
             motor_value += Gain[i] * x_data[i][0];
         }
-        motor_csv = motor_value;
         // offset
         if (motor_value > 0)
         {
@@ -528,8 +493,7 @@ int main()
         {
             motor_value -= motor_offset;
         }
-        //std::cout << "motor_value:" << motor_value << std::endl;
-
+       
         // calculate PWM pulse width
         pwm_duty = int(motor_value * 100.0f / 3.3f);
 
@@ -586,7 +550,7 @@ int main()
         // start the angle update process
         update_theta_syn_flag = 1;
         // wait
-        std::chrono::microseconds dura3(feedback_dura);
+        std::chrono::milliseconds dura3(feedback_dura);
         std::this_thread::sleep_for(dura3);
     }
     csvFile.close();
