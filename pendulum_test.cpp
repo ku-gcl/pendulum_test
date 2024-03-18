@@ -165,7 +165,7 @@ void rotary_encoder(){
 // It takes 650 usec. (NUCLEO-F401RE 84MHz, BMX055)
 //=========================================================
 void update_theta(int bus_acc, int bus_gyr){
-    while{!stopThread2}{
+    while(!stopThread2){
         if (update_theta_syn_flag == 1){
             // detach the rotary encoder polling
             enc_syn = 0;
@@ -235,8 +235,8 @@ void update_theta(int bus_acc, int bus_gyr){
 
 void csv_write(){
     while(!stopThreadcsv){
-        // csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
-        std::cout << "CSVに書き込みました" << std::endl;
+        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+        // std::cout << "CSVに書き込みました" << std::endl;
         
         time_csv=time_csv+10; //msec
         std::chrono::milliseconds dura_csv(csv_rate);
@@ -451,11 +451,7 @@ int main()
         mat_sub(y[0], C_x_x[0], delta_y[0], 4, 1);                // y-Cx'
         mat_mul(G[0], delta_y[0], delta_x[0], 4, 4, 4, 1);        // G(y-Cx')
         mat_add(x_data_predict[0], delta_x[0], x_data[0], 4, 1);  // x'+G(y-Cx')
-        theta1_csv=x_data[0][0];
-        theta2_csv=x_data[1][0];
-        theta1dot_csv=x_data[2][0];
-        theta2dot_csv=x_data[3][0];
-        
+                
         // calculate covariance matrix: P=(I-GC)P'
         mat_mul(G[0], C_x[0], GC[0], 4, 4, 4, 4);              // GC
         mat_sub(I4[0], GC[0], I4_GC[0], 4, 4);                 // I-GC
@@ -474,6 +470,10 @@ int main()
         mat_mul(A_x[0], x_data[0], A_x_x[0], 4, 4, 4, 1);       // Ax_hat
         mat_mul_const(B_x[0], Vin, B_x_Vin[0], 4, 1);           // Bu
         mat_add(A_x_x[0], B_x_Vin[0], x_data_predict[0], 4, 1); // Ax+Bu
+        theta1_csv=x_data_predict[0][0];
+        theta2_csv=x_data_predict[1][0];
+        theta1dot_csv=x_data_predict[2][0];
+        theta2dot_csv=x_data_predict[3][0];
 
         // predict covariance matrix: P'=APA^T + BUB^T
         mat_tran(A_x[0], tran_A_x[0], 4, 4);                    // A^T
