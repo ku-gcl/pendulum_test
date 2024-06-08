@@ -25,12 +25,28 @@ bool stopThread2=false;
 bool stopThreadcsv=false;
 
 std::ofstream csvFile;
+
+//=========================================================
+// Gain vector for the state feedback
+//(R=1000, Q = diag(1, 1, 10, 10), f=100Hz)
+// float Gain[4] = {29.87522919, 4.59857246, 0.09293, 0.37006248};
+float Gain[4] = {96.34668317353481, 15.112060762484786, 0.7925636783224236, 1.2331571996093764};
+
+
 int csv_rate = 10;
+
 float time_csv=0;
 float theta1_csv=0;
 float theta2_csv=0;
 float theta1dot_csv=0;
 float theta2dot_csv=0;
+
+float theta1kal_csv=0;
+float theta2kal_csv=0;
+float theta1dotkal_csv=0;
+float theta2dotkal_csv=0;
+
+float x_f[4][1]={-0.072,0,0,0};
 
 //=========================================================
 // Port Setting
@@ -52,7 +68,7 @@ const int LED_G = 22;
 // Accelerometer and gyro statistical data
 int sample_num = 100;
 float meas_interval = 10000; // usec
-float theta_mean;
+float theta_mean=0;
 float theta_variance;
 float theta_dot_mean;
 float theta_dot_variance;
@@ -98,16 +114,16 @@ float P_x[4][4];
 //"A" of the state equation (update freq = 100 Hz)
 //"B" of the state equation (update freq = 100 Hz)
 //matrix Ax (discrete time)
-float A_x[4][4]=  {{1.0022261662585084, 0.010007423157527657, 0.0, 4.465092819988847e-05},
- {0.4449564215185254, 1.0022261662585084, 0.0, 0.008846819829339195},
- {-0.0014716701781144724, -4.9287847971381375e-06, 1.0, 0.009711484266907367},
- {-0.2915863440890973, -0.0014716701781144724, 0.0, 0.9428549643835731}};
+float A_x[4][4]=  {{1.0022101364920777, 0.01000736933759299, 0.0, 4.3210055583546874e-05},
+ {0.4417962226778376, 1.0022101364920777, 0.0, 0.008560652140727404},
+ {-0.0013550406779803275, -4.538359252051067e-06, 1.0, 0.009709237793470039},
+ {-0.26845676831626103, -0.0013550406779803275, 0.0, 0.94241471701796}};
 
 //matrix Bx (discrete time)
-float B_x[4][1]=  {{-0.0002871073058120404},
- {-0.05688541556931065},
- {0.0018551680368610664},
- {0.36744493066118095}};
+float B_x[4][1]=  {{-0.00027784243559379453},
+ {-0.05504534555508876},
+ {0.0018696129535105486},
+ {0.3702757393392488}};
 
 //"C" of the state equation (update freq = 100 Hz)
 float C_x[4][4] = {
@@ -132,12 +148,6 @@ int motor_direction = 1;
 float motor_offset = 0.17; // volt
 
 //=========================================================
-// Gain vector for the state feedback
-//(R=1000, Q = diag(1, 1, 10, 10), f=100Hz)
-// float Gain[4] = {29.87522919, 4.59857246, 0.09293, 0.37006248};
-float Gain[4] = {92.61122950240585, 14.55037722756369, 0.7935475423345529, 1.2353814334633895};
-
-//=========================================================
 // Rotary encoder polling function
 // It takes 4usec. (NUCLEO-F401RE 84MHz)
 //=========================================================
@@ -153,7 +163,6 @@ void rotary_encoder(){
             encoder_value += value;
             std::chrono::microseconds dura1(rotary_encoder_update_rate);
             std::this_thread::sleep_for(dura1);
-            return;
         }
     }
 }
@@ -167,13 +176,14 @@ void update_theta(int bus_acc, int bus_gyr){
         if (update_theta_syn_flag == 1){
             // detach the rotary encoder polling
             enc_syn = 0;
-
+            
             // measurement data
             float y = get_acc_data(pi, bus_acc); // degree
-
-            // input data
             float theta_dot_gyro = get_gyr_data(pi, bus_gyr); // degree/sec
 
+            theta1_csv=y*3.1415926/180;
+            theta1dot_csv=theta2dot_csv*3.1415926/180;
+             
             // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
             float tran_C_theta[2][1] = {};
@@ -233,9 +243,9 @@ void update_theta(int bus_acc, int bus_gyr){
 
 void csv_write(){
     while(!stopThreadcsv){
-        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << "," << theta1kal_csv << "," << theta2kal_csv << "," << theta1dotkal_csv << "," << theta2dotkal_csv << std::endl;
         // std::cout << "CSVに書き込みました" << std::endl;
-        
+            
         time_csv=time_csv+10; //msec
         std::chrono::milliseconds dura_csv(csv_rate);
         std::this_thread::sleep_for(dura_csv);
@@ -268,7 +278,7 @@ int main()
 {
     csvFile.open("output.csv"); // ファイルを開く
     std::signal(SIGINT, signalHandler);
-    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
+    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << "," << "theta1kal" << "," << "theta2kal" << "," << "theta1_dotkal" << "," << "theta2_dotkal" << std::endl;
     thread_csv = std::thread(csv_write);
     
     pi = pigpio_start(NULL, NULL);
@@ -298,7 +308,11 @@ int main()
     //-------------------------------------------
     acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean, theta_variance);
     gyr_init(pi, bus_gyr, sample_num, meas_interval, theta_dot_mean, theta_dot_variance);
-
+    
+    theta_variance = 0.067856;
+    theta_dot_mean = 0.074292;
+    theta_dot_variance = 0.055558;
+    
     //-------------------------------------------
     // Rotary encoder initialization
     //-------------------------------------------
@@ -392,10 +406,10 @@ int main()
             measure_variance_mat[i][j] = 0;
         }
     }
-    float deg_rad_coeff = (3.14 * 3.14) / (180 * 180);
+    float deg_rad_coeff = (3.1415926 * 3.1415926) / (180 * 180);
     measure_variance_mat[0][0] = theta_variance * deg_rad_coeff;
     measure_variance_mat[1][1] = theta_dot_variance * deg_rad_coeff;
-    float encoder_error = 0.1f * 2 * 3.14f / (4 * rotary_encoder_resolution);
+    float encoder_error = 0.1f * 2 * 3.1415926f / (4 * rotary_encoder_resolution);
     measure_variance_mat[2][2] = encoder_error * encoder_error;
     float encoder_rate_error = encoder_error / feedback_rate;
     measure_variance_mat[3][3] = encoder_rate_error * encoder_rate_error;
@@ -418,7 +432,7 @@ int main()
     while (1)
     {
         // std::cout << "----mainloop----" << std::endl;
-        
+            
         // stop theta update process
         update_theta_syn_flag = 0;
 
@@ -430,12 +444,16 @@ int main()
         // Kalman Filter (all system)
         //---------------------------------------
         // measurement data
-        y[0][0] = theta_data[0][0] * 3.14f / 180;
+        y[0][0] = theta_data[0][0] * 3.1415926f / 180;
         theta1_dot_temp = get_gyr_data(pi, bus_gyr);
-        y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;
-        y[2][0] = encoder_value * (2 * 3.14f) / (4 * rotary_encoder_resolution);
+        y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.1415926f / 180;
+        y[2][0] = encoder_value * (2 * 3.1415926f) / (4 * rotary_encoder_resolution);
         y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;
         
+        theta2_csv=y[2][0];
+        theta2dot_csv=y[3][0];
+            
+
         // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
         mat_tran(C_x[0], tran_C_x[0], 4, 4);                            // C^T
         mat_mul(P_x_predict[0], tran_C_x[0], P_CT[0], 4, 4, 4, 4);      // P'C^T
@@ -449,7 +467,11 @@ int main()
         mat_sub(y[0], C_x_x[0], delta_y[0], 4, 1);                // y-Cx'
         mat_mul(G[0], delta_y[0], delta_x[0], 4, 4, 4, 1);        // G(y-Cx')
         mat_add(x_data_predict[0], delta_x[0], x_data[0], 4, 1);  // x'+G(y-Cx')
-                
+        theta1kal_csv=x_data[0][0];
+        theta2kal_csv=x_data[1][0];
+        theta1dotkal_csv=x_data[2][0];
+        theta2dotkal_csv=x_data[3][0];
+
         // calculate covariance matrix: P=(I-GC)P'
         mat_mul(G[0], C_x[0], GC[0], 4, 4, 4, 4);              // GC
         mat_sub(I4[0], GC[0], I4_GC[0], 4, 4);                 // I-GC
@@ -468,10 +490,10 @@ int main()
         mat_mul(A_x[0], x_data[0], A_x_x[0], 4, 4, 4, 1);       // Ax_hat
         mat_mul_const(B_x[0], Vin, B_x_Vin[0], 4, 1);           // Bu
         mat_add(A_x_x[0], B_x_Vin[0], x_data_predict[0], 4, 1); // Ax+Bu
-        theta1_csv=x_data_predict[0][0];
-        theta2_csv=x_data_predict[1][0];
-        theta1dot_csv=x_data_predict[2][0];
-        theta2dot_csv=x_data_predict[3][0];
+        // theta1_csv=x_data_predict[0][0];
+        // theta2_csv=x_data_predict[1][0];
+        // theta1dot_csv=x_data_predict[2][0];
+        // theta2dot_csv=x_data_predict[3][0];
 
         // predict covariance matrix: P'=APA^T + BUB^T
         mat_tran(A_x[0], tran_A_x[0], 4, 4);                    // A^T
@@ -487,11 +509,15 @@ int main()
         //---------------------------------------
         // reset
         motor_value = 0;
+        x_data[0][0]=theta1_csv;
+        x_data[1][0]=theta1dot_csv;
+        x_data[2][0]=theta2_csv;
+        x_data[3][0]=theta2dot_csv;
 
         // calculate Vin
         for (int i = 0; i < 4; i++)
         {
-            motor_value += Gain[i] * x_data[i][0];
+            motor_value += Gain[i] * (x_data[i][0] - x_f[i][0] );
         }
         // offset
         if (motor_value > 0)

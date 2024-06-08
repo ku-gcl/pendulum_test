@@ -32,11 +32,8 @@ const int LED_G = 22;
 //=========================================================
 // Accelerometer and gyro statistical data
 int sample_num = 1000;
-float meas_interval = 2500; // usec
+int meas_interval = 2500; // usec
 float theta_mean;
-float theta_variance;
-float theta_dot_mean;
-float theta_dot_variance;
 
 //=========================================================
 // Main
@@ -54,6 +51,13 @@ int main()
     set_mode(pi, IN1, PI_OUTPUT);
     set_mode(pi, IN2, PI_OUTPUT);
     set_mode(pi, PWM, PI_OUTPUT);
+    
+    // initialize ACC register 0x0F (range)
+    // Full scale = +/- 2 G
+    i2c_write_byte_data(pi, bus_acc, 0x0F, 0x03);
+    // initialize ACC register 0x10 (band width)
+    // Filter bandwidth = 1000 Hz
+    i2c_write_byte_data(pi, bus_acc, 0x10, 0x0F);
 
     //-------------------------------------------
     // LED
@@ -69,16 +73,25 @@ int main()
     // Accelerometer & Gyro initialization
     //-------------------------------------------
     
-    csvFile.open("output2.csv");
-    csvFile << "theta_mean" << "," << "theta_variance" << "," << "theta_dot_mean" << "," << "theta_dot_variance" << std::endl;
+    csvFile.open("output3.csv");
+    csvFile << "theta" << std::endl;
     
-    for(int i = 0; i < 10; i++)
+    float theta_array[sample_num];
+    for (int i = 0; i < sample_num; i++)
     {
-    acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean, theta_variance);
-    gyr_init(pi, bus_gyr, sample_num, meas_interval, theta_dot_mean, theta_dot_variance);
-    csvFile << theta_mean << "," << theta_variance << "," << theta_dot_mean << "," << theta_dot_variance << std::endl;
+        theta_array[i] = get_acc_data(pi, bus_acc)*3.1415926/180 ;
+        csvFile << theta_array[i]  << std::endl;
+        usleep(meas_interval);
     }
     
+    theta_mean = 0;
+    for (int i = 0; i < sample_num; i++)
+    {
+        theta_mean += theta_array[i];
+    }
+    theta_mean /= sample_num;
+    std::cout << "theta_mean:" << theta_mean << std::endl;
+
     csvFile.close();
     return 0;
 }
