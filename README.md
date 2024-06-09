@@ -40,7 +40,7 @@ source ./cleanup.sh
 ## ボタン動作の内容を記述したファイルを実行
 
 ```bash
-python3 /home/ubuntu/pendulum_project/pendulum_test/pendulum_auto_start_script.py
+python3 /home/ubuntu/pendulum_pj/pendulum_test/pendulum_auto_start_script.py
 ```
 
 `python`ではなく、`python3`を使用すること。
@@ -109,7 +109,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 pendulum_auto_start_script.py
-WorkingDirectory=/home/ubuntu/pendulum_project/pendulum_test
+WorkingDirectory=/home/ubuntu/pendulum_pj/pendulum_test
 
 [Install]
 WantedBy=multi-user.target
@@ -160,7 +160,7 @@ Description=Execution pendulum auto start script
 
 [Service]
 ExecStart=/usr/bin/python3 pendulum_auto_start_script.py
-WorkingDirectory=/home/ubuntu/pendulum_project/pendulum_test
+WorkingDirectory=/home/ubuntu/pendulum_pj/pendulum_test
 
 [Install]
 WantedBy=multi-user.target
