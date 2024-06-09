@@ -5,7 +5,7 @@ import subprocess
 import signal
 
 # you should set the location of the bin folder
-BASE_DIR = "/home/ubuntu/pendulum_project/pendulum_test/bin/"
+BASE_DIR = "/home/ubuntu/pendulum_pj/pendulum_test/bin/"
 PEN_DIR = os.path.join(BASE_DIR, "PENDULUM")
 PEN_CLEAN_DIR = os.path.join(BASE_DIR, "PENDULUM_CLEANUP")
 

@@ -9,9 +9,9 @@
 コードを編集したらコードをコンパイルする。
 
 ```bash
-g++ -o /home/ubuntu/pendulum_project/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/main.cpp -lpigpiod_if2 -lrt -pthread
 
-g++ -o /home/ubuntu/bin/pendulum_project/pendulum_test/PENDULUM_CLEANUP /home/ubuntu/pendulum_project/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP /home/ubuntu/pendulum_pj/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt
 ```
 
 # 開発中に使用した内容（Archive）
