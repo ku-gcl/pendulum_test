@@ -9,9 +9,9 @@
 コードを編集したらコードをコンパイルする。
 
 ```bash
-g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/main.cpp -lpigpiod_if2 -lrt -pthread
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src/main.cpp -lpigpiod_if2 -lrt -pthread
 
-g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP /home/ubuntu/pendulum_pj/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP /home/ubuntu/pendulum_pj/pendulum_test/src/cleanup.cpp -lpigpiod_if2 -lrt
 ```
 
 # 開発中に使用した内容（Archive）
@@ -186,5 +186,5 @@ ps aux | grep ros | grep -v grep | awk '{ print "kill -9", $2 }' | sh
 ROS ノードを停止するコマンドを実行して、cleanup のコードを実行する。
 
 ```
-source ./cleanup.sh
+source ./Tools/cleanup.sh
 ```
