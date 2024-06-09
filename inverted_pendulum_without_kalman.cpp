@@ -12,7 +12,6 @@
 #include "sensor.h"
 #include "signal_handler.h"
 
-
 std::thread thread1;
 std::thread thread2;
 int enc_syn = 1;
@@ -26,9 +25,9 @@ const int GYR_ADDR = 0x69;
 const int pin1 = 24; // to A
 const int pin2 = 23; // to B
 
-extern const int IN1 = 6;  // Motor driver input 1
-extern const int IN2 = 5;  // Motor driver input 2
-const int PWM = 12; // Motor driver PWM input
+extern const int IN1 = 6; // Motor driver input 1
+extern const int IN2 = 5; // Motor driver input 2
+const int PWM = 12;       // Motor driver PWM input
 
 extern const int LED_R = 17;
 extern const int LED_Y = 27;
@@ -37,7 +36,7 @@ extern const int LED_G = 22;
 //=========================================================
 // Accelerometer and gyro statistical data
 int sample_num = 100;
-float meas_interval = 10000;    // us micro seconds
+float meas_interval = 10000; // us micro seconds
 float theta_mean;
 float theta_variance;
 float theta_dot_mean;
@@ -82,17 +81,17 @@ float P_x_predict[4][4];
 float P_x[4][4];
 //"A" of the state equation (update freq = 100 Hz)
 //"B" of the state equation (update freq = 100 Hz)
-//matrix Ax (discrete time)
-float A_x[4][4]=  {{1.0022261662585084, 0.010007423157527657, 0.0, 4.465092819988847e-05},
- {0.4449564215185254, 1.0022261662585084, 0.0, 0.008846819829339195},
- {-0.0014716701781144724, -4.9287847971381375e-06, 1.0, 0.009711484266907367},
- {-0.2915863440890973, -0.0014716701781144724, 0.0, 0.9428549643835731}};
+// matrix Ax (discrete time)
+float A_x[4][4] = {{1.0022261662585084, 0.010007423157527657, 0.0, 4.465092819988847e-05},
+                   {0.4449564215185254, 1.0022261662585084, 0.0, 0.008846819829339195},
+                   {-0.0014716701781144724, -4.9287847971381375e-06, 1.0, 0.009711484266907367},
+                   {-0.2915863440890973, -0.0014716701781144724, 0.0, 0.9428549643835731}};
 
-//matrix Bx (discrete time)
-float B_x[4][1]=  {{-0.0002871073058120404},
- {-0.05688541556931065},
- {0.0018551680368610664},
- {0.36744493066118095}};
+// matrix Bx (discrete time)
+float B_x[4][1] = {{-0.0002871073058120404},
+                   {-0.05688541556931065},
+                   {0.0018551680368610664},
+                   {0.36744493066118095}};
 
 //"C" of the state equation (update freq = 100 Hz)
 float C_x[4][4] = {
@@ -109,8 +108,8 @@ float voltage_variance = voltage_error * voltage_error;
 
 //=========================================================
 // Motor control variables
-float feedback_rate = 0.01; //sec
-int feedback_dura = 10; //msec
+float feedback_rate = 0.01; // sec
+int feedback_dura = 10;     // msec
 float motor_value = 0;
 int pwm_duty = 0;
 int motor_direction = 1;
@@ -123,12 +122,12 @@ float motor_offset = 0.17; // volt
 
 float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.3061630717935332};
 
-
 //=========================================================
 // Rotary encoder polling function
 // It takes 4usec. (NUCLEO-F401RE 84MHz)
 //=========================================================
-void rotary_encoder(){
+void rotary_encoder()
+{
     if (enc_syn == 1)
     {
         static int code;
@@ -391,7 +390,7 @@ int main()
         y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;
         y[2][0] = encoder_value * (2 * 3.14f) / (4 * rotary_encoder_resolution);
         y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;
-        
+
         // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
         mat_tran(C_x[0], tran_C_x[0], 4, 4);                            // C^T
         mat_mul(P_x_predict[0], tran_C_x[0], P_CT[0], 4, 4, 4, 4);      // P'C^T

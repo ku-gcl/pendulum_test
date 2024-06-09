@@ -4,6 +4,11 @@ import os
 import subprocess
 import signal
 
+# you should set the location of the bin folder
+BASE_DIR = "/home/ubuntu/pendulum_project/pendulum_test/bin/"
+PEN_DIR = os.path.join(BASE_DIR, "PENDULUM")
+PEN_CLEAN_DIR = os.path.join(BASE_DIR, "PENDULUM_CLEANUP")
+
 GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)
 
@@ -41,7 +46,7 @@ while True:
                 subprocess.run(KILL_CMD1, shell=True)
                 
                 # Prepare to execute cleanup script and run the codes
-                ABORT_CMD2 = "sudo /home/ubuntu/PENDULUM_CLEANUP"
+                ABORT_CMD2 = "sudo {}".format(PEN_CLEAN_DIR)
                 for i in range(5):
                     subprocess.run(ABORT_CMD2, shell=True)
                 
@@ -54,7 +59,7 @@ while True:
             if sw2_timer >= 20:
                 print("-------Control START------\n")
                 # C++コードをバックグラウンドで実行。そのためにsubprocess.Popenを使用
-                EXEC_CMD = "sudo /home/ubuntu/PENDULUM"
+                EXEC_CMD = "sudo {}".format(PEN_DIR)
                 exec_process = subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 GPIO.wait_for_edge(SW2, GPIO.RISING)
                 time.sleep(1)

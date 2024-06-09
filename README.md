@@ -2,9 +2,21 @@
 
 倒立振子用のテストコード
 
-# コマンド
+# 最新の情報
 
-## 実行
+## コンパイルコマンド
+
+コードを編集したらコードをコンパイルする。
+
+```bash
+g++ -o /home/ubuntu/pendulum_project/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_project/pendulum_test/inverted_pendulum_without_kalman.cpp -lpigpiod_if2 -lrt -pthread
+
+g++ -o /home/ubuntu/bin/pendulum_project/pendulum_test/PENDULUM_CLEANUP /home/ubuntu/pendulum_project/pendulum_test/cleanup.cpp -lpigpiod_if2 -lrt
+```
+
+# 開発中に使用した内容（Archive）
+
+## スクリプトの実行
 
 ```
 g++ -o LED LED.cpp -lpigpiod_if2 -lrt
@@ -25,7 +37,7 @@ sudo ./pendulum
 source ./cleanup.sh
 ```
 
-## ボタン用のスクリプトを実行
+## ボタン動作の内容を記述したファイルを実行
 
 ```bash
 python3 /home/ubuntu/pendulum_project/pendulum_test/pendulum_auto_start_script.py
@@ -34,14 +46,13 @@ python3 /home/ubuntu/pendulum_project/pendulum_test/pendulum_auto_start_script.p
 `python`ではなく、`python3`を使用すること。
 `python`を使うと、GPIO ピンの ON/OFF が動作しなくなる。
 
-
 ## 電源ライトを点滅させる
 
 ```bash
 sudo nano /boot/firmware/config.txt
 ```
 
-config.txtを編集
+config.txt を編集
 
 ```config.txt
 
@@ -58,13 +69,12 @@ dtparam=pwr_led_trigger=heartbeat
 sudo reboot
 ```
 
+## ctrl+C や ctrl+Z のコマンド操作を検知
 
-## ctrl+Cやctrl+Zのコマンド操作を検知
-
-[Cで強制終了を回避(出来るだけ)](https://qiita.com/Ki4mTaria/items/838f81d3eecd5cc7d91e)
-
+[C で強制終了を回避(出来るだけ)](https://qiita.com/Ki4mTaria/items/838f81d3eecd5cc7d91e)
 
 ## コマンド履歴
+
 ```bash
 history
 ```
@@ -83,14 +93,14 @@ sudo /home/ubuntu/PENDULUM_CLEANUP
 
 ## 自動起動
 
-[systemdを使ってスクリプト自動起動](https://monomonotech.jp/kurage/raspberrypi/systemd_autostart.html)
+[systemd を使ってスクリプト自動起動](https://monomonotech.jp/kurage/raspberrypi/systemd_autostart.html)
 
 ```bash
 sudo touch /etc/systemd/system/pendulum.service
 sudo nano /etc/systemd/system/pendulum.service
 ```
 
-pendulum.serviceを編集。
+pendulum.service を編集。
 
 ```pendulum.service
 [Unit]
@@ -116,13 +126,14 @@ sudo systemctl disable pendulum.service
 ```
 
 サービスファイルを編集したときは
+
 ```bash
 sudo systemctl daemon-reload
 ```
 
-## pigpiod.serviceを編集
+## pigpiod.service を編集
 
-[pigpio DaemonのOption](https://abyz.me.uk/rpi/pigpio/pigpiod.html)
+[pigpio Daemon の Option](https://abyz.me.uk/rpi/pigpio/pigpiod.html)
 
 ```bash
 sudo touch /etc/systemd/system/pigpiod.service
@@ -155,12 +166,10 @@ WorkingDirectory=/home/ubuntu/pendulum_project/pendulum_test
 WantedBy=multi-user.target
 ```
 
-
 ```bash
 sudo killall pigpiod
 sudo systemctl status pigpiod
 ```
-
 
 ## ROS ノードをすべて終了するとき
 
