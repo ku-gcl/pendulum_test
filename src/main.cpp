@@ -8,9 +8,9 @@
 #include <csignal>
 #include <cstdlib>
 
-#include "matrix_operations.h"
-#include "sensor.h"
-#include "signal_handler.h"
+#include "../include/matrix_operations.h"
+#include "../include/sensor.h"
+#include "../include/signal_handler.h"
 
 std::thread thread1;
 std::thread thread2;
