@@ -10,7 +10,6 @@
 #include "kalman_filter.h"
 #include "motor_control.h"
 #include "encoder.h"
-#include "signal_handler.h"
 
 
 std::thread thread1;
@@ -18,9 +17,6 @@ std::thread thread2;
 
 void setup()
 {
-    std::signal(SIGINT, signalHandler);
-    std::signal(SIGTSTP, signalHandler);
-
     pi = pigpio_start(NULL, NULL);
     bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
