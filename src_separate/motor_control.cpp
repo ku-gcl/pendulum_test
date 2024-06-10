@@ -1,3 +1,6 @@
+#include <unistd.h>
+#include <cmath>
+
 #include "motor_control.h"
 #include "pigpiod_if2.h"
 #include "config.h"

@@ -2,6 +2,8 @@
 #include "encoder.h"
 #include "pigpiod_if2.h"
 #include "config.h"
+#include <chrono>
+#include <thread>
 
 void rotary_encoder()
 {

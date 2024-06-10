@@ -10,13 +10,11 @@
 #include "kalman_filter.h"
 #include "motor_control.h"
 #include "encoder.h"
-#include "../include/signal_handler.h"
+#include "signal_handler.h"
 
 
 std::thread thread1;
 std::thread thread2;
-int enc_syn = 1;
-int update_theta_syn_flag = 1;
 
 void setup()
 {

@@ -56,3 +56,9 @@ extern int pwm_duty;
 extern int motor_direction;
 extern float motor_offset;
 extern float Gain[4];
+
+// encoder
+extern int enc_syn;
+extern int update_theta_syn_flag;
+
+extern float y[4][1];

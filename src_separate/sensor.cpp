@@ -1,3 +1,6 @@
+#include <cmath>
+#include <unistd.h>
+
 #include "sensor.h"
 #include "pigpiod_if2.h"
 

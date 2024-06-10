@@ -10,6 +10,7 @@ float theta_mean;
 float theta_variance;
 float theta_dot_mean;
 float theta_dot_variance;
+float y[4][1];
 
 int rotary_encoder_update_rate = 25; // usec
 int rotary_encoder_resolution = 100;
@@ -62,3 +63,9 @@ int pwm_duty = 0;
 int motor_direction = 1;
 float motor_offset = 0.17f; // volt
 float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.3061630717935332};
+
+
+// encoder
+int enc_syn = 1;
+int update_theta_syn_flag = 1;
+

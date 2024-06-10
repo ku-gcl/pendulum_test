@@ -1,6 +1,10 @@
+#include <chrono>
+#include <thread>
+
 #include "kalman_filter.h"
 #include "matrix_operations.h"
 #include "config.h"
+#include "sensor.h"
 
 void kalman_filter_init() {
     // 初期値の設定
