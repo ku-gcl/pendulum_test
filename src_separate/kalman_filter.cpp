@@ -94,7 +94,7 @@ void update_theta(int bus_acc, int bus_gyr) {
 }
 
 void kalman_filter_update() {
-    float y[4][1];
+    // float y[4][1];
     float theta1_dot_temp = get_gyr_data(pi, bus_gyr);
     y[0][0] = theta_data[0][0] * 3.14f / 180;
     y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;

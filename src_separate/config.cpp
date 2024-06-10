@@ -2,6 +2,8 @@
 
 // グローバル変数の定義
 int pi;
+int bus_acc;
+int bus_gyr;
 int sample_num = 100;
 float meas_interval = 10000.0f; // us micro seconds
 float theta_mean;

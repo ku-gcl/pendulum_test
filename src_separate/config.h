@@ -1,6 +1,8 @@
 #pragma once
 
 extern int pi;
+extern int bus_acc;
+extern int bus_gyr;
 const int ACC_ADDR = 0x19;
 const int GYR_ADDR = 0x69;
 const int pin1 = 24;

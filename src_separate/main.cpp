@@ -1,5 +1,6 @@
 #include <pigpiod_if2.h>
 #include <csignal>
+#include <unistd.h>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -9,6 +10,7 @@
 #include "kalman_filter.h"
 #include "motor_control.h"
 #include "encoder.h"
+#include "../include/signal_handler.h"
 
 
 std::thread thread1;
@@ -22,8 +24,8 @@ void setup()
     std::signal(SIGTSTP, signalHandler);
 
     pi = pigpio_start(NULL, NULL);
-    int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
-    int bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
+    bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
+    bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
 
     set_mode(pi, LED_R, PI_OUTPUT);
     set_mode(pi, LED_Y, PI_OUTPUT);
