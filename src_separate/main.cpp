@@ -1,5 +1,4 @@
 #include <pigpiod_if2.h>
-#include <csignal>
 #include <unistd.h>
 #include <iostream>
 #include <thread>
