@@ -21,8 +21,8 @@ extern float theta_variance;
 extern float theta_dot_mean;
 extern float theta_dot_variance;
 
-extern int rotary_encoder_update_rate;
-extern int rotary_encoder_resolution;
+extern int encoder_update_rate;
+extern int encoder_resolution;
 extern int encoder_value;
 extern int table[16];
 extern float pre_theta2;

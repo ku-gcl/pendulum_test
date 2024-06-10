@@ -12,15 +12,15 @@ float theta_dot_mean;
 float theta_dot_variance;
 float y[4][1];
 
-int rotary_encoder_update_rate = 25; // usec
-int rotary_encoder_resolution = 100;
+int encoder_update_rate = 25; // usec
+int encoder_resolution = 100;
 int encoder_value = 0;
 int table[16] = {0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0};
 float pre_theta2 = 0.0f;
 
 float theta_update_freq = 400.0f; // Hz
 float theta_update_interval = 1.0f / theta_update_freq;
-int th1_dura = 1000000 * 1.0f / theta_update_freq;
+int th1_dura = 1000000 * 1.0f / theta_update_freq;  // 2500usec for theta_update_freq=400
 float theta_data_predict[2][1] = {{0}, {0}};
 float theta_data[2][1] = {{0}, {0}};
 float P_theta_predict[2][2] = {{1, 0}, {0, 0}};

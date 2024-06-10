@@ -13,8 +13,7 @@ void rotary_encoder()
         code = ((code << 2) + (gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf;
         int value = -1 * table[code];
         encoder_value += value;
-        std::chrono::microseconds dura1(rotary_encoder_update_rate);
-        std::this_thread::sleep_for(dura1);
+        std::this_thread::sleep_for(std::chrono::microseconds(encoder_update_rate));
         return;
     }
 }
