@@ -57,6 +57,7 @@ int main()
 
     while (true)
     {
+        // main loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
         update_theta_syn_flag = 0;
         gpio_write(pi, LED_R, 0);
         gpio_write(pi, LED_G, 0);

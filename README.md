@@ -8,6 +8,14 @@
 
 コードを編集したらコードをコンパイルする。
 
+### src_separate
+
+```bash
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src_separate/*.cpp -lpigpiod_if2 -lrt -pthread
+```
+
+### src
+
 ```bash
 g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src/main.cpp -lpigpiod_if2 -lrt -pthread
 
