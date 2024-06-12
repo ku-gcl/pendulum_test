@@ -45,7 +45,6 @@ void setup()
 
     gpio_write(pi, LED_R, 1);
     gpio_write(pi, LED_G, 1);
-    sleep(1);
 
     // CSV ファイルのオープン
     createDirectoryIfNotExists(LOG_DATA_DIR);
@@ -87,13 +86,21 @@ int main()
         float elapsed_time = std::chrono::duration<float>(elapsed).count();
 
         // データの取得（仮の値を使用）
-        float theta_p = y[0][0];
-        float theta_w = 3.0f;
-        float theta_p_dot = 4.0f;
-        float theta_w_dot = 5.0f;
+        // センサ値
+        // float theta_p = y[0][0];
+        // float theta_w = 3.0f;
+        // float theta_p_dot = 4.0f;
+        // float theta_w_dot = 5.0f;
+
+        // KFの推定値
+        float theta_p_kf = y[0][0];
+        float theta_w_kf = y[1][0];
+        float theta_p_dot_kf = y[2][0];
+        float theta_w_dot_kf = y[3][0];
+
 
         // CSV書き込み
-        csv_write(time, elapsed_time, theta_p, theta_w, theta_p_dot, theta_w_dot);
+        csv_write(time, elapsed_time, theta_p_kf, theta_w_kf, theta_p_dot_kf, theta_w_dot_kf);
 
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;

@@ -12,7 +12,7 @@ float theta_dot_mean;
 float theta_dot_variance;
 float y[4][1];
 // フォルダ名は最後に"/"を付けること
-std::string LOG_DATA_DIR = "/home/ubuntu/pendulum_pj/pendulum_test/data2/";
+std::string LOG_DATA_DIR = "/home/ubuntu/pendulum_pj/pendulum_test/data/";
 
 int encoder_update_rate = 25; // usec
 int encoder_resolution = 100;
