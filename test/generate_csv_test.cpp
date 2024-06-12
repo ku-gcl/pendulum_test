@@ -17,8 +17,9 @@ void signalHandler(int signum) {
     exit(signum);
 }
 
-void csv_write(float time, float elapsed_time, float thetap, float thetaw, float thetap_dot, float thetaw_dot) {
-    csvFile << time << "," << elapsed_time << "," << thetap << "," << thetaw << "," << thetap_dot << "," << thetaw_dot << std::endl;
+void csv_write(double time, float elapsed_time, float thetap, float thetaw, float thetap_dot, float thetaw_dot) {
+    csvFile << std::fixed << std::setprecision(3) << time << ",";
+    csvFile << std::fixed << std::setprecision(5) << elapsed_time << "," << thetap << "," << thetaw << "," << thetap_dot << "," << thetaw_dot << std::endl;
 }
 
 std::string getCurrentDateTime() {
@@ -40,7 +41,7 @@ int main() {
 
     std::signal(SIGINT, signalHandler);
 
-    csvFile << "time" << "," << "elapsed_time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
+    csvFile << "time" << "," << "elapsed_time" << "," << "thetap" << "," << "thetaw" << "," << "thetap_dot" << "," << "thetaw_dot" << std::endl;
 
     float thetap, thetaw, thetap_dot, thetaw_dot;
 
@@ -51,7 +52,7 @@ int main() {
         auto now = std::chrono::system_clock::now();
         auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
         auto epoch = now_ms.time_since_epoch();
-        float time = epoch.count() / 1000.0f;
+        double time = epoch.count() / 1000.0;
 
         // スタートからの経過時間の取得
         auto elapsed = now - start;
