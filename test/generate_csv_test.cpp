@@ -19,9 +19,9 @@ void signalHandler(int signum) {
     exit(signum);
 }
 
-void csv_write(double time, float elapsed_time, float thetap, float thetaw, float thetap_dot, float thetaw_dot) {
+void csv_write(double time, float elapsed_time, float theta_p, float theta_w, float theta_p_dot, float theta_w_dot) {
     csvFile << std::fixed << std::setprecision(3) << time << ",";
-    csvFile << std::fixed << std::setprecision(5) << elapsed_time << "," << thetap << "," << thetaw << "," << thetap_dot << "," << thetaw_dot << std::endl;
+    csvFile << std::fixed << std::setprecision(5) << elapsed_time << "," << theta_p << "," << theta_w << "," << theta_p_dot << "," << theta_w_dot << std::endl;
 }
 
 std::string getCurrentDateTime() {
@@ -43,9 +43,9 @@ int main() {
 
     std::signal(SIGINT, signalHandler);
 
-    csvFile << "time" << "," << "elapsed_time" << "," << "thetap" << "," << "thetaw" << "," << "thetap_dot" << "," << "thetaw_dot" << std::endl;
+    csvFile << "time" << "," << "elapsed_time" << "," << "theta_p" << "," << "theta_w" << "," << "theta_p_dot" << "," << "theta_w_dot" << std::endl;
 
-    float thetap, thetaw, thetap_dot, thetaw_dot;
+    float theta_p, theta_w, theta_p_dot, theta_w_dot;
 
     auto start = std::chrono::system_clock::now();
 
@@ -61,13 +61,13 @@ int main() {
         float elapsed_time = std::chrono::duration<float>(elapsed).count();
 
         // データの取得（仮の値を使用）
-        thetap = 2.0f;
-        thetaw = 3.0f;
-        thetap_dot = 4.0f;
-        thetaw_dot = 5.0f;
+        theta_p = 2.0f;
+        theta_w = 3.0f;
+        theta_p_dot = 4.0f;
+        theta_w_dot = 5.0f;
 
         // CSV書き込み
-        csv_write(time, elapsed_time, thetap, thetaw, thetap_dot, thetaw_dot);
+        csv_write(time, elapsed_time, theta_p, theta_w, theta_p_dot, theta_w_dot);
 
         // スリープ
         std::this_thread::sleep_for(std::chrono::milliseconds(main_rate));
