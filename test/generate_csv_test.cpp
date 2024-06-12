@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <sstream>
 
+/*CSVへのデータ出力をテスト*/
+
 std::ofstream csvFile;
 int main_rate = 100; // 100ms
 

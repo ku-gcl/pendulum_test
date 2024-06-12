@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iomanip> // std::fixed, std::setprecision
 
+/*CSVに記録するtimeデータの表示テスト*/
+
 int main() {
     // 現在時刻の取得（秒単位）
     auto now = std::chrono::system_clock::now();
