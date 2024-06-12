@@ -14,6 +14,17 @@
 g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src_separate/*.cpp -lpigpiod_if2 -lrt -pthread
 ```
 
+### generate_csv_test.cpp
+
+```
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TEST /home/ubuntu/pendulum_pj/pendulum_test/test/generate_csv_test.cpp
+/home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TEST
+
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TIME_TEST /home/ubuntu/pendulum_pj/pendulum_test/test/csv_time_test.cpp
+/home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TIME_TEST
+```
+
+
 ### src
 
 ```bash
