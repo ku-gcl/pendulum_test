@@ -7,7 +7,7 @@ int main() {
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
     auto epoch = now_ms.time_since_epoch();
-    float time = epoch.count() / 1000.0f;
+    double time = epoch.count() / 1000.0;
 
     // 取得した現在時刻を表示（通常の浮動小数点数表記で）
     std::cout << std::fixed << std::setprecision(3);
