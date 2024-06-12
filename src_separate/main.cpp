@@ -9,7 +9,7 @@
 #include "kalman_filter.h"
 #include "motor_control.h"
 #include "encoder.h"
-
+#include "csv_writer.h" // CSV 書き込み機能をインクルード
 
 std::thread thread1;
 std::thread thread2;
@@ -42,6 +42,18 @@ void setup()
     encoder_value = 0;
     motor_driver_init(pi);
     kalman_filter_init();
+
+    gpio_write(pi, LED_R, 1);
+    gpio_write(pi, LED_G, 1);
+    sleep(1);
+
+    // CSV ファイルのオープン
+    createDirectoryIfNotExists(LOG_DATA_DIR);
+    std::string filename = LOG_DATA_DIR + "log_" + getCurrentDateTime() + ".csv";
+    openCSVFile(filename);
+
+    gpio_write(pi, LED_R, 0);
+    gpio_write(pi, LED_G, 0);
 }
 
 int main()
@@ -55,6 +67,8 @@ int main()
 
     gpio_write(pi, LED_Y, 0);
 
+    auto start = std::chrono::system_clock::now();
+
     while (true)
     {
         // main loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
@@ -65,9 +79,27 @@ int main()
         kalman_filter_update();
         motor_control_update();
 
+        // 現在時刻の取得
+        double time = getCurrentEpochTimeUTC();
+
+        // スタートからの経過時間の取得
+        auto elapsed = std::chrono::system_clock::now() - start;
+        float elapsed_time = std::chrono::duration<float>(elapsed).count();
+
+        // データの取得（仮の値を使用）
+        float theta_p = y[0][0];
+        float theta_w = 3.0f;
+        float theta_p_dot = 4.0f;
+        float theta_w_dot = 5.0f;
+
+        // CSV書き込み
+        csv_write(time, elapsed_time, theta_p, theta_w, theta_p_dot, theta_w_dot);
+
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;
         std::this_thread::sleep_for(std::chrono::milliseconds(feedback_dura));
     }
+
+    closeCSVFile();
     return 0;
 }

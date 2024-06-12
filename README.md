@@ -9,9 +9,14 @@
 コードを編集したらコードをコンパイルする。
 
 ### src_separate
+csv出力するフォルダがあるか確認するためにfilesystemを使用する。filesystemはC++17からサポートだが、デフォルトはC++14なので、c++のバージョンをc++17に指定してコンパイル
 
 ```bash
-g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src_separate/*.cpp -lpigpiod_if2 -lrt -pthread
+g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubuntu/pendulum_pj/pendulum_test/src_separate/*.cpp -lpigpiod_if2 -lrt -pthread
+
+/home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM
+
+/home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP
 ```
 
 ### generate_csv_test.cpp
@@ -22,6 +27,9 @@ g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TEST /home/ubuntu/pendulum
 
 g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TIME_TEST /home/ubuntu/pendulum_pj/pendulum_test/test/csv_time_test.cpp
 /home/ubuntu/pendulum_pj/pendulum_test/bin/CSV_TIME_TEST
+
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/VERSION /home/ubuntu/pendulum_pj/pendulum_test/test/version_test.cpp
+/home/ubuntu/pendulum_pj/pendulum_test/bin/VERSION
 ```
 
 

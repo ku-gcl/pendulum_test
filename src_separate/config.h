@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 extern int pi;
 extern int bus_acc;
 extern int bus_gyr;
@@ -13,6 +15,7 @@ const int PWM = 12;
 const int LED_R = 17;
 const int LED_Y = 27;
 const int LED_G = 22;
+extern std::string LOG_DATA_DIR;
 
 extern int sample_num;
 extern float meas_interval;
