@@ -504,6 +504,7 @@ void update_theta()
     float delta_y = y - C_theta_theta[0][0];//y-Ctheta'
     float delta_theta[2][1] = {};
     mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
+    // 行列の先頭のアドレスを引数として、行列計算を行う
     mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
            
     //calculate covariance matrix: P=(I-GC)P'
