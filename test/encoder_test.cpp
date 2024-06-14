@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <thread>
 #include <chrono>
 // for detect ctrol+c
@@ -22,7 +23,7 @@ bool stopThread1=false;
 bool stopThread2=false;
 bool stopThreadcsv=false;
 
-std::ofstream csvFile;
+// std::ofstream csvFile;
 
 int csv_rate = 10;
 
@@ -148,7 +149,7 @@ void rotary_encoder(){
         {
             // check the movement
             code = ((code << 2) + (gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf; // !caution!
-            std::cout << 1 << std::endl;
+            // std::cout << 1 << std::endl;
             // update the encoder value
             int value = -1 * table[code];
             encoder_value += value;
@@ -156,15 +157,35 @@ void rotary_encoder(){
             // std::chrono::milliseconds dura1(rotary_encoder_update_rate);
             std::this_thread::sleep_for(dura1);
         }else{
-            std::cout << -1 << std::endl;
+            // std::cout << -1 << std::endl;
         }
     }
 }
 
+// void csv_write(){
+//     while(!stopThreadcsv){
+//         csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+//         // std::cout << "CSVに書き込みました" << std::endl;
+//         time_csv=time_csv+10; //msec
+//         std::chrono::milliseconds dura_csv(csv_rate);
+//         std::this_thread::sleep_for(dura_csv);
+//     }
+// }
+
+
+// console write
 void csv_write(){
     while(!stopThreadcsv){
-        csvFile << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
-        // std::cout << "CSVに書き込みました" << std::endl;
+        // std::cout << time_csv << "," << theta1_csv << "," << theta2_csv << "," << theta1dot_csv << "," << theta2dot_csv << std::endl;
+        std::cout << std::fixed << std::setprecision(3); // 固定小数点表記と精度の設定
+
+            // 列の幅を設定して表示
+            std::cout << std::setw(10) << time_csv << ","
+                    << std::setw(10) << theta1_csv << ","
+                    << std::setw(10) << theta2_csv << ","
+                    << std::setw(10) << theta1dot_csv << ","
+                    << std::setw(10) << theta2dot_csv
+                    << std::endl;
         time_csv=time_csv+10; //msec
         std::chrono::milliseconds dura_csv(csv_rate);
         std::this_thread::sleep_for(dura_csv);
@@ -184,7 +205,7 @@ void signalHandler(int signum) {
         gpio_write(pi, LED_R, 0);
         gpio_write(pi, LED_Y, 0);
         gpio_write(pi, LED_G, 0);
-        csvFile.close();
+        // csvFile.close();
         pigpio_stop(pi);
         exit(signum);
     }
@@ -192,9 +213,9 @@ void signalHandler(int signum) {
 
 int main()
 {
-    csvFile.open("output_test.csv"); // ファイルを開く
     std::signal(SIGINT, signalHandler);
-    csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
+    // csvFile.open("output_test.csv"); // ファイルを開く
+    // csvFile << "time" << "," << "theta1" << "," << "theta2" << "," << "theta1_dot" << "," << "theta2_dot" << std::endl;
     
     pi = pigpio_start(NULL, NULL);
     int bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
@@ -251,7 +272,8 @@ int main()
         std::chrono::milliseconds mainlooprate(100);
         std::this_thread::sleep_for(mainlooprate);
     }
-    csvFile.close();
+    // csvFile.close();
+
     //======10000//=====================================
     // Main loop (end)
     //===========================================
