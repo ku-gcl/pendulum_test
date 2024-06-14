@@ -78,6 +78,9 @@ int main()
         kalman_filter_update();
         motor_control_update();
 
+        //=========================================================
+        // Log data
+        //=========================================================
         // 現在時刻の取得
         double time = getCurrentEpochTimeUTC();
 
@@ -86,21 +89,25 @@ int main()
         float elapsed_time = std::chrono::duration<float>(elapsed).count();
 
         // データの取得（仮の値を使用）
-        // センサ値
-        // float theta_p = y[0][0];
-        // float theta_w = 3.0f;
-        // float theta_p_dot = 4.0f;
-        // float theta_w_dot = 5.0f;
+        // 測定値
+        float theta_p = y[0][0];        // rad
+        float theta_p_dot = y[1][0];    // rad/s
+        float theta_w = y[2][0];        // rad
+        float theta_w_dot = y[3][0];    // rad/s
 
         // KFの推定値
-        float theta_p_kf = y[0][0];
-        float theta_w_kf = y[1][0];
-        float theta_p_dot_kf = y[2][0];
-        float theta_w_dot_kf = y[3][0];
+        float theta_p_kf = x_data[0][0];
+        float theta_p_dot_kf = x_data[1][0];
+        float theta_w_kf = x_data[2][0];
+        float theta_w_dot_kf = x_data[3][0];
 
+        // 制御入力
+        float log_motor_value = motor_value;
+        float log_motor_direction = motor_direction;
+        float log_pwm_duty = pwm_duty;
 
         // CSV書き込み
-        csv_write(time, elapsed_time, theta_p_kf, theta_w_kf, theta_p_dot_kf, theta_w_dot_kf);
+        csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf, log_motor_value, log_motor_direction, log_pwm_duty);
 
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;
