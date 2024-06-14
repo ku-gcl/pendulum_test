@@ -16,9 +16,16 @@ void signalHandler(int signum) {
     exit(signum);
 }
 
-void csv_write(double time, float elapsed_time, float theta_p, float theta_w, float theta_p_dot, float theta_w_dot) {
+// void csv_write(double time, float elapsed_time, float theta_p, float theta_w, float theta_p_dot, float theta_w_dot) {
+//     csvFile << std::fixed << std::setprecision(3) << time << ",";
+//     csvFile << std::fixed << std::setprecision(5) << elapsed_time << "," << theta_p << "," << theta_w << "," << theta_p_dot << "," << theta_w_dot << std::endl;
+// }
+void csv_write(double time, float elapsed_time, float theta_p, float theta_p_dot, float theta_w, float theta_w_dot, float theta_p_kf, float theta_p_dot_kf, float theta_w_kf, float theta_w_dot_kf, float log_motor_value, int log_motor_direction, float log_pwm_duty) {
     csvFile << std::fixed << std::setprecision(3) << time << ",";
-    csvFile << std::fixed << std::setprecision(5) << elapsed_time << "," << theta_p << "," << theta_w << "," << theta_p_dot << "," << theta_w_dot << std::endl;
+    csvFile << std::fixed << std::setprecision(5) << elapsed_time << ",";
+    csvFile << std::fixed << std::setprecision(5) << theta_p << "," << theta_p_dot << "," << theta_w << "," << theta_w_dot << ",";
+    csvFile << std::fixed << std::setprecision(5) << theta_p_kf << "," << theta_p_dot_kf << "," << theta_w_kf << "," << theta_w_dot_kf << ",";
+    csvFile << std::fixed << std::setprecision(5) << log_motor_value << "," << log_motor_direction << "," << log_pwm_duty << std::endl;
 }
 
 std::string getCurrentDateTime() {
@@ -38,7 +45,7 @@ void openCSVFile(const std::string &filename) {
     }
     std::cout << "CSV try to open2." << std::endl;
     std::signal(SIGINT, signalHandler);
-    csvFile << "time" << "," << "elapsed_time" << "," << "theta_p" << "," << "theta_w" << "," << "theta_p_dot" << "," << "theta_w_dot" << std::endl;
+    csvFile << "time,elapsed_time,theta_p,theta_p_dot,theta_w,theta_w_dot,theta_p_kf,theta_p_dot_kf,theta_w_kf,theta_w_dot_kf,log_motor_value,log_motor_direction,log_pwm_duty" << std::endl;
     std::cout << "CSV file opened successfully." << std::endl;
 }
 
