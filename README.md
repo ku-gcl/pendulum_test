@@ -19,6 +19,12 @@ g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubun
 /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP
 ```
 
+### encoder_test.cpp
+```
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/ENCODER /home/ubuntu/pendulum_pj/pendulum_test/test/encoder_test.cpp -lpigpiod_if2 -lrt -pthread
+/home/ubuntu/pendulum_pj/pendulum_test/bin/ENCODER
+```
+
 ### generate_csv_test.cpp
 
 ```
