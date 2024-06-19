@@ -39,67 +39,70 @@ void kalman_filter_init() {
 }
 
 void update_theta(int bus_acc, int bus_gyr) {
-    if (update_theta_syn_flag == 0) {
-        return;
+    // if (update_theta_syn_flag == 0) {
+    //     return;
+    // }
+    while (true) {
+        if (update_theta_syn_flag == 1) {
+            // enc_syn = 0;
+
+            // 姿勢角のセンサ値
+            float theta = get_acc_data(pi, bus_acc);
+            // 姿勢角速度のセンサ値
+            float theta_dot_gyro = get_gyr_data(pi, bus_gyr);
+
+            //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
+            float P_CT[2][1] = {};
+            float tran_C_theta[2][1] = {};
+            mat_tran(C_theta[0], tran_C_theta[0], 1, 2);
+            mat_mul(P_theta_predict[0], tran_C_theta[0], P_CT[0], 2, 2, 2, 1);
+            float G_temp1[1][1] = {};
+            mat_mul(C_theta[0], P_CT[0], G_temp1[0], 1, 2, 2, 1);
+            float G_temp2 = 1.0f / (G_temp1[0][0] + theta_variance);
+            float G[2][1] = {};
+            mat_mul_const(P_CT[0], G_temp2, G[0], 2, 1);
+
+            //theta_data estimation: theta = theta'+G(y-Ctheta')
+            float C_theta_theta[1][1] = {};
+            mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2, 2, 1);
+            float delta_y = theta - C_theta_theta[0][0];
+            float delta_theta[2][1] = {};
+            mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
+            mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
+
+            //calculate covariance matrix: P=(I-GC)P'
+            float GC[2][2] = {};
+            float I2[2][2] = {{1, 0}, {0, 1}};
+            mat_mul(G[0], C_theta[0], GC[0], 2, 1, 1, 2);
+            float I2_GC[2][2] = {};
+            mat_sub(I2[0], GC[0], I2_GC[0], 2, 2);
+            mat_mul(I2_GC[0], P_theta_predict[0], P_theta[0], 2, 2, 2, 2);
+
+            //predict the next step data: theta'=Atheta+Bu
+            float A_theta_theta[2][1] = {};
+            float B_theta_dot[2][1] = {};
+            mat_mul(A_theta[0], theta_data[0], A_theta_theta[0], 2, 2, 2, 1);
+            mat_mul_const(B_theta[0], theta_dot_gyro, B_theta_dot[0], 2, 1);
+            mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2, 1);
+
+            //predict covariance matrix: P'=APA^T + BUB^T
+            float AP[2][2] = {};
+            float APAT[2][2] = {};
+            float tran_A_theta[2][2] = {};
+            mat_tran(A_theta[0], tran_A_theta[0], 2, 2);
+            mat_mul(A_theta[0], P_theta[0], AP[0], 2, 2, 2, 2);
+            mat_mul(AP[0], tran_A_theta[0], APAT[0], 2, 2, 2, 2);
+            float BBT[2][2];
+            float tran_B_theta[1][2] = {};
+            mat_tran(B_theta[0], tran_B_theta[0], 2, 1);
+            mat_mul(B_theta[0], tran_B_theta[0], BBT[0], 2, 1, 1, 2);
+            float BUBT[2][2] = {};
+            mat_mul_const(BBT[0], theta_dot_variance, BUBT[0], 2, 2);
+            mat_add(APAT[0], BUBT[0], P_theta_predict[0], 2, 2);
+
+            enc_syn = 1;
+        }
     }
-    
-    enc_syn = 0;
-
-    // 姿勢角のセンサ値
-    float theta = get_acc_data(pi, bus_acc);
-    // 姿勢角速度のセンサ値
-    float theta_dot_gyro = get_gyr_data(pi, bus_gyr);
-
-    //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
-    float P_CT[2][1] = {};
-    float tran_C_theta[2][1] = {};
-    mat_tran(C_theta[0], tran_C_theta[0], 1, 2);
-    mat_mul(P_theta_predict[0], tran_C_theta[0], P_CT[0], 2, 2, 2, 1);
-    float G_temp1[1][1] = {};
-    mat_mul(C_theta[0], P_CT[0], G_temp1[0], 1, 2, 2, 1);
-    float G_temp2 = 1.0f / (G_temp1[0][0] + theta_variance);
-    float G[2][1] = {};
-    mat_mul_const(P_CT[0], G_temp2, G[0], 2, 1);
-
-    //theta_data estimation: theta = theta'+G(y-Ctheta')
-    float C_theta_theta[1][1] = {};
-    mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2, 2, 1);
-    float delta_y = theta - C_theta_theta[0][0];
-    float delta_theta[2][1] = {};
-    mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
-    mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
-
-    //calculate covariance matrix: P=(I-GC)P'
-    float GC[2][2] = {};
-    float I2[2][2] = {{1, 0}, {0, 1}};
-    mat_mul(G[0], C_theta[0], GC[0], 2, 1, 1, 2);
-    float I2_GC[2][2] = {};
-    mat_sub(I2[0], GC[0], I2_GC[0], 2, 2);
-    mat_mul(I2_GC[0], P_theta_predict[0], P_theta[0], 2, 2, 2, 2);
-
-    //predict the next step data: theta'=Atheta+Bu
-    float A_theta_theta[2][1] = {};
-    float B_theta_dot[2][1] = {};
-    mat_mul(A_theta[0], theta_data[0], A_theta_theta[0], 2, 2, 2, 1);
-    mat_mul_const(B_theta[0], theta_dot_gyro, B_theta_dot[0], 2, 1);
-    mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2, 1);
-
-    //predict covariance matrix: P'=APA^T + BUB^T
-    float AP[2][2] = {};
-    float APAT[2][2] = {};
-    float tran_A_theta[2][2] = {};
-    mat_tran(A_theta[0], tran_A_theta[0], 2, 2);
-    mat_mul(A_theta[0], P_theta[0], AP[0], 2, 2, 2, 2);
-    mat_mul(AP[0], tran_A_theta[0], APAT[0], 2, 2, 2, 2);
-    float BBT[2][2];
-    float tran_B_theta[1][2] = {};
-    mat_tran(B_theta[0], tran_B_theta[0], 2, 1);
-    mat_mul(B_theta[0], tran_B_theta[0], BBT[0], 2, 1, 1, 2);
-    float BUBT[2][2] = {};
-    mat_mul_const(BBT[0], theta_dot_variance, BUBT[0], 2, 2);
-    mat_add(APAT[0], BUBT[0], P_theta_predict[0], 2, 2);
-
-    enc_syn = 1;
     std::this_thread::sleep_for(std::chrono::microseconds(th1_dura));
 }
 
@@ -109,9 +112,9 @@ void kalman_filter_update() {
     y[0][0] = theta_data[0][0] * 3.14f / 180;   // rad
     y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;  // rad/s
     y[2][0] = encoder_value * (2 * 3.14f) / (4 * encoder_resolution);   // rad
-    y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;                   // rad
+    y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;                   // rad/s
 
-    
+
     //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
     float tran_C_x[4][4];
     float P_CT[4][4];
