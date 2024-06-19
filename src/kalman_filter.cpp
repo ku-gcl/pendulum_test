@@ -151,11 +151,11 @@ void kalman_filter_update() {
 
     //predict the next step data: x'=Ax+Bu
     float Vin = motor_value;
-    if (motor_value > 3.3f) {
-        Vin = 3.3f;
+    if (motor_value > MAX_VOLTAGE) {
+        Vin = MAX_VOLTAGE;
     }
-    if (motor_value < -3.3f) {
-        Vin = -3.3f;
+    if (motor_value < -MAX_VOLTAGE) {
+        Vin = -MAX_VOLTAGE;
     }
     float A_x_x[4][1];
     float B_x_Vin[4][1];

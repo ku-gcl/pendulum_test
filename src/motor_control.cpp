@@ -32,7 +32,7 @@ void motor_control_update()
     }
 
     // PWMデューティサイクルの計算
-    pwm_duty = static_cast<int>(motor_value * 100.0f / 3.3f);
+    pwm_duty = static_cast<int>(motor_value * 100.0f / MAX_VOLTAGE);
 
     // モーターの駆動方向に応じてGPIOピンを制御
     if (pwm_duty >= 0) {

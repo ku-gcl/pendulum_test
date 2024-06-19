@@ -58,6 +58,7 @@ extern float motor_value;
 extern int pwm_duty;
 extern int motor_direction;
 extern float motor_offset;
+extern float MAX_VOLTAGE;
 extern float Gain[4];
 
 // encoder

@@ -64,6 +64,7 @@ float motor_value = 0.0f;
 int pwm_duty = 0;
 int motor_direction = 1;
 float motor_offset = 0.17f; // volt
+float MAX_VOLTAGE = 3.3f;    // エンコーダーに入力する最大電圧 [V]
 float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.3061630717935332};
 
 
