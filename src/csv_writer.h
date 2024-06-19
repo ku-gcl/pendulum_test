@@ -6,7 +6,7 @@
 
 void signalHandler(int signum);
 void csv_write(double time, float elapsed_time, float theta_p, float theta_p_dot, float theta_w, float theta_w_dot, float theta_p_kf, float theta_p_dot_kf, float theta_w_kf, float theta_w_dot_kf, float log_motor_value, int log_motor_direction, float log_pwm_duty);
-void csv_write(float elapsed_time, float theta_p, float theta_p_dot, float theta_w, float theta_w_dot, float theta_p_kf, float theta_p_dot_kf, float theta_w_kf, float theta_w_dot_kf, float log_motor_value, int log_motor_direction, float log_pwm_duty);
+void console_write(float elapsed_time, float theta_p, float theta_p_dot, float theta_w, float theta_w_dot, float theta_p_kf, float theta_p_dot_kf, float theta_w_kf, float theta_w_dot_kf, float log_motor_value, int log_motor_direction, float log_pwm_duty);
 std::string getCurrentDateTime();
 void openCSVFile(const std::string &filename);
 void closeCSVFile();
