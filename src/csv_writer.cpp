@@ -32,25 +32,27 @@ void console_write(float elapsed_time, float theta_p, float theta_p_dot, float t
     std::cout << std::fixed << std::setprecision(3); // 固定小数点表記と精度の設定
 
     // 列の幅を設定して表示
+    // std::cout << std::setw(10) << elapsed_time << ","
+    //         << std::setw(10) << theta_p << ","
+    //         << std::setw(10) << theta_p_dot << ","
+    //         << std::setw(10) << theta_w << ","
+    //         << std::setw(10) << theta_w_dot
+    //         << std::endl;
+            
+    /** all **/
     std::cout << std::setw(10) << elapsed_time << ","
             << std::setw(10) << theta_p << ","
             << std::setw(10) << theta_p_dot << ","
             << std::setw(10) << theta_w << ","
-            << std::setw(10) << theta_w_dot
+            << std::setw(10) << theta_w_dot << ","
+            << std::setw(10) << theta_p_kf << ","
+            << std::setw(10) << theta_p_dot_kf << ","
+            << std::setw(10) << theta_w_kf << ","
+            << std::setw(10) << theta_w_dot_kf << ","
+            << std::setw(10) << log_motor_value << ","
+            << std::setw(10) << log_motor_direction << ","
+            << std::setw(10) << log_pwm_duty
             << std::endl;
-            /** all **/
-            // << std::setw(10) << theta_p << ","
-            // << std::setw(10) << theta_p_dot << ","
-            // << std::setw(10) << theta_w << ","
-            // << std::setw(10) << theta_w_dot << ","
-            // << std::setw(10) << theta_p_kf << ","
-            // << std::setw(10) << theta_p_dot_kf << ","
-            // << std::setw(10) << theta_w_kf << ","
-            // << std::setw(10) << theta_w_dot_kf << ","
-            // << std::setw(10) << log_motor_value << ","
-            // << std::setw(10) << log_motor_direction << ","
-            // << std::setw(10) << log_pwm_duty
-            // << std::endl;
 }
 
 
