@@ -68,6 +68,8 @@ int main()
 
     while (true)
     {
+        auto loop_start = std::chrono::system_clock::now();
+
         // main loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
         update_theta_syn_flag = 0;
         gpio_write(pi, LED_R, 0);
@@ -112,7 +114,15 @@ int main()
 
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;
-        std::this_thread::sleep_for(std::chrono::milliseconds(feedback_dura));
+
+        // 処理時間を含めたスリープ時間の計算
+        auto loop_end = std::chrono::system_clock::now();
+        auto loop_duration = std::chrono::duration_cast<std::chrono::milliseconds>(loop_end - loop_start).count();
+        auto sleep_time = feedback_dura - loop_duration;
+        if (sleep_time > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+        }
+        // std::this_thread::sleep_for(std::chrono::milliseconds(feedback_dura));
     }
 
     closeCSVFile();
