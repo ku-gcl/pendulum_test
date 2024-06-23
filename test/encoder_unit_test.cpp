@@ -31,9 +31,19 @@ void rotary_encoder() {
         if (enc_syn == 1) {
             auto enc_loop_start = std::chrono::steady_clock::now();
             code = ((code << 2) + (gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1)) & 0xf; // !caution!
+
+            // int encoder_bus = int((gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1));
+            // code = (code + encoder_bus) & 0xf;
+
+            // int pin_value = (gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1); // 2進数の読み取り
+            // code = (code * 4 + pin_value) % 16; // 10進数でコードを更新
+
+
             // update the encoder value
             int value = -1 * table[code]; // Fix the direction if necessary
             encoder_value += value;
+
+
             // std::cout << "Updated Encoder Value: " << encoder_value << ", Code: " << code << ", Value: " << value << std::endl; // Debug output
             // std::cout << "Value: " << value << std::endl;
 
@@ -68,7 +78,7 @@ int main() {
     std::cout << "Initial Pin States: ENC_PIN1 = " << initial_pin1 << ", ENC_PIN2 = " << initial_pin2 << std::endl;
 
     // エンコーダの初期値を設定
-    code = ((gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1)) & 0xf;
+    code = int((gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1)) & 0xf;
 
     thread_encoder = std::thread(rotary_encoder);
     auto start = std::chrono::system_clock::now();
