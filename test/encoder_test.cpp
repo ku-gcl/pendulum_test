@@ -269,8 +269,7 @@ int main()
         theta1_csv=t1*3.1415926/180;
         theta1dot_csv=t1dot*3.1415926/180;
 
-        std::chrono::milliseconds mainlooprate(100);
-        std::this_thread::sleep_for(mainlooprate);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     // csvFile.close();
 
