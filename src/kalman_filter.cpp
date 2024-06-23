@@ -44,7 +44,7 @@ void update_theta(int bus_acc, int bus_gyr) {
     // }
     while (true) {
         if (update_theta_syn_flag == 1) {
-            // enc_syn = 0;
+            enc_syn = 0;
 
             // 姿勢角のセンサ値
             float theta = get_acc_data(pi, bus_acc);
