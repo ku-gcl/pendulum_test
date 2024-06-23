@@ -28,6 +28,15 @@ g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/ENCODER /home/ubuntu/pendulum_
 /home/ubuntu/pendulum_pj/pendulum_test/bin/ENCODER
 ```
 
+
+### udp_unit_test.cpp
+```
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/UDP /home/ubuntu/pendulum_pj/pendulum_test/test/udp_unit_test.cpp
+
+/home/ubuntu/pendulum_pj/pendulum_test/bin/UDP
+```
+
+
 ### generate_csv_test.cpp
 
 ```
