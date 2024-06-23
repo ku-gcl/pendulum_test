@@ -4,16 +4,20 @@
 #include <thread>
 #include <chrono>
 
-int pi;
 
-int ENC_PIN1 = 24;
-int ENC_PIN2 = 23;
+int pi;     // raspberry pi
+const double PI = 3.14159265358979323846;   // 円周率
+const double rad2deg = 180.0 / PI;  // ラジアンを度に変換する定数
+
+int ENC_PIN1 = 24;      // A
+int ENC_PIN2 = 23;      // B
 int enc_syn = 1;
 int encoder_update_rate = 25;    // usec
 int encoder_resolution = 100;
 int encoder_value = 0;
 int table[16] = {0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0};
 int code;
+
 
 float pre_theta_w = 0.0f;
 
@@ -25,13 +29,20 @@ std::thread thread_encoder;
 void rotary_encoder() {
     while(1) {
         if (enc_syn == 1) {
-            // std::cout << "code: " << code << std::endl;
-            // check the movement
+            auto enc_loop_start = std::chrono::steady_clock::now();
             code = ((code << 2) + (gpio_read(pi, ENC_PIN2) << 1) + gpio_read(pi, ENC_PIN1)) & 0xf; // !caution!
             // update the encoder value
             int value = -1 * table[code]; // Fix the direction if necessary
             encoder_value += value;
             // std::cout << "Updated Encoder Value: " << encoder_value << ", Code: " << code << ", Value: " << value << std::endl; // Debug output
+            // std::cout << "Value: " << value << std::endl;
+
+            auto enc_loop_end = std::chrono::steady_clock::now();
+            auto enc_loop_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(enc_loop_end - enc_loop_start).count();
+            int sleep_time_ms = encoder_update_rate - enc_loop_duration_us;
+            if (sleep_time_ms > 0) {
+                std::this_thread::sleep_for(std::chrono::microseconds(sleep_time_ms));
+            }
             // std::this_thread::sleep_for(std::chrono::microseconds(encoder_update_rate));
         }
     }
@@ -41,8 +52,8 @@ void console_write(float elapsed_time, float theta_w, float theta_w_dot) {
     std::cout << std::fixed << std::setprecision(3); // 固定小数点表記と精度の設定
     // 列の幅を設定して表示
     std::cout << std::setw(10) << elapsed_time << ","
-              << std::setw(10) << theta_w << ","
-              << std::setw(10) << theta_w_dot << ","
+              << std::setw(10) << theta_w*rad2deg << ","
+              << std::setw(10) << theta_w_dot*rad2deg << ","
               << std::endl;
 }
 
@@ -66,9 +77,9 @@ int main() {
         auto main_loop_start = std::chrono::system_clock::now();
 
         // デバッグ用にencoder_valueを出力する
-        std::cout << "Encoder Value: " << encoder_value << std::endl;
+        // std::cout << "Encoder Value: " << encoder_value << std::endl;
 
-        float theta_w = encoder_value * (2 * 3.14f) / (4 * encoder_resolution);
+        float theta_w = encoder_value * (2 * PI) / (4 * encoder_resolution);
         float theta_w_dot = (theta_w - pre_theta_w) / main_loop_rate;
         pre_theta_w = theta_w;
 
