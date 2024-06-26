@@ -19,6 +19,16 @@ g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubun
 /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP
 ```
 
+### inclinometer_unit_test.cpp
+
+```bash
+g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/INCLINOMETER /home/ubuntu/pendulum_pj/pendulum_test/test/inclinometer_unit_test.cpp /home/ubuntu/pendulum_pj/pendulum_test/src/matrix_operations.cpp  -lpigpiod_if2 -lrt -pthread
+
+
+/home/ubuntu/pendulum_pj/pendulum_test/bin/INCLINOMETER
+```
+
+
 ### encoder_test.cpp
 ```
 g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/ENCODER /home/ubuntu/pendulum_pj/pendulum_test/test/encoder_test.cpp -lpigpiod_if2 -lrt -pthread
