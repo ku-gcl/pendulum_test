@@ -40,7 +40,6 @@ float theta_mean;
 float theta_variance;
 float theta_dot_mean;
 float theta_dot_variance;
-float y[4][1];
 
 //Update rate
 float theta_update_freq = 400.0f; //Hz
@@ -65,6 +64,10 @@ int feedback_dura = 10; // msec
 
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
+
+// sensor data
+float theta;
+float theta_dot_gyro;
 
 
 void console_write(float elapsed_time, float theta_p, float theta_p_dot, float theta_p_kf, float theta_p_dot_kf) {
@@ -207,9 +210,9 @@ void update_theta(int bus_acc, int bus_gyr) {
             enc_syn = 0;
 
             // 姿勢角のセンサ値
-            float theta = get_acc_data(pi, bus_acc);
+            theta = get_acc_data(pi, bus_acc);
             // 姿勢角速度のセンサ値
-            float theta_dot_gyro = get_gyr_data(pi, bus_gyr);
+            theta_dot_gyro = get_gyr_data(pi, bus_gyr);
 
             //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
@@ -262,8 +265,8 @@ void update_theta(int bus_acc, int bus_gyr) {
 
             enc_syn = 1;
         }
+        std::this_thread::sleep_for(std::chrono::microseconds(th1_dura));
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(th1_dura));
 }
 
 
@@ -338,8 +341,8 @@ int main()
 
         // データの取得（仮の値を使用）
         // 測定値
-        float theta_p = y[0][0];        // rad
-        float theta_p_dot = y[1][0];    // rad/s
+        float theta_p = theta;        // rad
+        float theta_p_dot = theta_dot_gyro;    // rad/s
 
         // KFの推定値
         float theta_p_kf = theta_data[0][0];
