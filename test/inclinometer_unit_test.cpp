@@ -6,11 +6,21 @@
 #include <thread>
 #include <chrono>
 
-// #include "config.h"
-// #include "../src/kalman_filter.h"
-// #include "../src/sensor.h"
 #include "../src/matrix_operations.h"
 
+// udp
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cstring>
+#include <unistd.h>
+
+// udp
+int SOCKET_PORT = 12345;
+const char* SOCKET_IP = "192.168.1.199";
+
+
+// thread
 std::thread thread2;
 
 int pi;     // raspberry pi
@@ -68,6 +78,28 @@ int update_theta_syn_flag = 1;
 // sensor data
 float theta;
 float theta_dot_gyro;
+
+
+
+int init_udp_socket(int& sockfd, struct sockaddr_in& servaddr, const char* ip, int port) {
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        std::cerr << "Error creating socket" << std::endl;
+        return -1;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+    servaddr.sin_addr.s_addr = inet_addr(ip);
+
+    return 0;
+}
+
+void send_udp_packet(int sockfd, struct sockaddr_in& servaddr, const char* data) {
+    sendto(sockfd, data, strlen(data), 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+}
+
 
 
 void console_write(float elapsed_time, float theta_p, float theta_p_dot, float theta_p_kf, float theta_p_dot_kf) {
@@ -320,6 +352,13 @@ int main()
 
     gpio_write(pi, LED_Y, 0);
 
+    // udp settings
+    int sockfd;
+    struct sockaddr_in servaddr;
+    if (init_udp_socket(sockfd, servaddr, SOCKET_IP, SOCKET_PORT) < 0) {
+        return 1;
+    }
+
     auto start = std::chrono::system_clock::now();
 
     while (true)
@@ -351,6 +390,13 @@ int main()
         // display表示
         console_write(elapsed_time, theta_p, theta_p_dot, theta_p_kf, theta_p_dot_kf);
 
+        // UDPパケットの送信
+        char buffer[1024];
+        snprintf(buffer, sizeof(buffer), "data;%f;%f;%f;%f;%f", elapsed_time, theta_p, theta_p_dot, theta_p_kf, theta_p_dot_kf);
+        send_udp_packet(sockfd, servaddr, buffer);
+
+
+
         // update_theta_syn_flag = 1;
 
         // 処理時間を含めたスリープ時間の計算
@@ -363,5 +409,6 @@ int main()
     }
 
     thread2.join();
+    close(sockfd);
     return 0;
 }
