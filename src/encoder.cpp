@@ -12,7 +12,8 @@ void rotary_encoder()
     while (true) {
         if (enc_syn == 1)
         {
-            static int code;
+            // TODO: check code is global or local
+            // static int code;
             code = ((code << 2) + (gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf;
             int value = -1 * table[code];
             encoder_value += value;

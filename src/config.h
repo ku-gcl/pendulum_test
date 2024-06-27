@@ -64,5 +64,6 @@ extern float Gain[4];
 // encoder
 extern int enc_syn;
 extern int update_theta_syn_flag;
+extern int code;
 
 extern float y[4][1];

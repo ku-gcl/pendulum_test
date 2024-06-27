@@ -71,4 +71,5 @@ float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269, 0.
 // encoder
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
+int code;
 
