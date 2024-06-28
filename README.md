@@ -21,6 +21,8 @@ g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM /home/ubun
 
 ### imu_unit_test.cpp
 ```
+g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/IMU /home/ubuntu/pendulum_pj/pendulum_test/test/imu_unit_test.cpp -lpigpiod_if2 -lrt -pthread
+
 g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/IMU /home/ubuntu/pendulum_pj/pendulum_test/test/imu_unit_test_chatgpt.cpp -lpigpiod_if2 -lrt -pthread
 
 /home/ubuntu/pendulum_pj/pendulum_test/bin/IMU
