@@ -131,7 +131,7 @@ float get_acc_data(int pi, int bus) {
     yAccl = y * 0.00098f; // range = +/-2g
     zAccl = z * 0.00098f; // range = +/-2g
 
-    float theta1_deg = atan2(float(zAccl), float(yAccl)) * 57.29578f;
+    float theta1_deg = atan2(float(zAccl), float(yAccl)) * rad2deg;
     return theta1_deg;
 }
 
@@ -149,9 +149,10 @@ float get_gyr_data(int pi, int bus) {
     if (z > 32767)
         z -= 65536;
 
-    xGyro = x * 0.0038f; //  Full scale = +/- 125 degree/s
-    yGyro = y * 0.0038f; //  Full scale = +/- 125 degree/s
-    zGyro = z * 0.0038f; //  Full scale = +/- 125 degree/s
+    // +1000 (deg/sec) / 2^15 = 0.0305176
+    xGyro = x * 0.0305176f; //  Full scale = +/- 1000 degree/s
+    yGyro = y * 0.0305176f; //  Full scale = +/- 1000 degree/s
+    zGyro = z * 0.0305176f; //  Full scale = +/- 1000 degree/s
 
     int theta1_dot = x;
 
