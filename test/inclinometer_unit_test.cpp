@@ -11,8 +11,8 @@
 
 int pi;                                   // raspberry pi
 const double PI = 3.14159265358979323846; // 円周率
-const double rad2deg = 180.0 / PI; // ラジアンを度に変換する定数
-const double deg2rad = PI / 180.0;
+const float rad2deg = 180.0 / PI; // ラジアンを度に変換する定数
+const float deg2rad = PI / 180.0;
 
 // sensor
 int bus_acc, bus_gyr;
@@ -101,7 +101,7 @@ void get_acc_data(int pi, int bus) {
     zAccl = z * 0.00098f; // range = +/-2g
 }
 
-float get_gyr_data(int pi, int bus) {
+void get_gyr_data(int pi, int bus) {
     char data[6];
     i2c_read_i2c_block_data(pi, bus_gyr, 0x02, data, 6);
 
@@ -130,7 +130,7 @@ float get_theta_p_deg(int pi, int bus) {
 float get_theta_p_dot_deg(int pi, int bus) {
     get_gyr_data(pi, bus);
     float theta_p_dot_deg = -1 * xGyro; // !caution!
-    return theta_p_dot_deg
+    return theta_p_dot_deg;
 }
 
 //=========================================================

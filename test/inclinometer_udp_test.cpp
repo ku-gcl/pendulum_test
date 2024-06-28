@@ -155,7 +155,7 @@ void get_acc_data(int pi, int bus) {
     zAccl = z * 0.00098f; // range = +/-2g
 }
 
-float get_gyr_data(int pi, int bus) {
+void get_gyr_data(int pi, int bus) {
     char data[6];
     i2c_read_i2c_block_data(pi, bus_gyr, 0x02, data, 6);
 
@@ -184,7 +184,7 @@ float get_theta_p_deg(int pi, int bus) {
 float get_theta_p_dot_deg(int pi, int bus) {
     get_gyr_data(pi, bus);
     float theta_p_dot_deg = -1 * xGyro; // !caution!
-    return theta_p_dot_deg
+    return theta_p_dot_deg;
 }
 
 //=========================================================
@@ -264,9 +264,9 @@ void update_theta(int bus_acc, int bus_gyr) {
             enc_syn = 0;
 
             // 姿勢角のセンサ値
-            theta = get_acc_data(pi, bus_acc); // deg
+            theta = get_theta_p_deg(pi, bus_acc); // deg
             // 姿勢角速度のセンサ値
-            theta_dot_gyro = get_gyr_data(pi, bus_gyr); // deg/s
+            theta_dot_gyro = get_theta_p_dot_deg(pi, bus_gyr); // deg/s
 
             // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
@@ -404,8 +404,8 @@ int main() {
 
         // データの取得（仮の値を使用）
         // 測定値
-        float theta_p = get_theta_p_deg * deg2rad;         // rad
-        float theta_p_dot = get_theta_p_dot_deg * deg2rad; // rad/s
+        float theta_p = get_theta_p_deg(pi, bus_acc) * deg2rad;         // rad
+        float theta_p_dot = get_theta_p_dot_deg(pi, bus_gyr) * deg2rad; // rad/s
 
         // KFの推定値
         float theta_p_kf = theta_data[0][0] * deg2rad;

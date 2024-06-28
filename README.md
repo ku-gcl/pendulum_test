@@ -32,7 +32,7 @@ g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/IMU /home/ubuntu/pe
 ### inclinometer_unit_test.cpp
 
 ```bash
-g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/INCLINOMETER /home/ubuntu/pendulum_pj/pendulum_test/test/inclinometer_unit_test.cpp /home/ubuntu/pendulum_pj/pendulum_test/src/matrix_operations.cpp  -lpigpiod_if2 -lrt -pthread
+g++ -std=c++17 -o /home/ubuntu/pendulum_pj/pendulum_test/bin/INCLINOMETER /home/ubuntu/pendulum_pj/pendulum_test/test/inclinometer_udp_test.cpp /home/ubuntu/pendulum_pj/pendulum_test/src/matrix_operations.cpp  -lpigpiod_if2 -lrt -pthread
 
 
 /home/ubuntu/pendulum_pj/pendulum_test/bin/INCLINOMETER
