@@ -104,8 +104,8 @@ void update_theta(int bus_acc, int bus_gyr) {
 
             enc_syn = 1;
         }
+        std::this_thread::sleep_for(std::chrono::microseconds(th1_dura));
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(th1_dura));
 }
 
 void kalman_filter_update() {
