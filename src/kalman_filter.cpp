@@ -1,9 +1,9 @@
 #include <chrono>
 #include <thread>
 
+#include "config.h"
 #include "kalman_filter.h"
 #include "matrix_operations.h"
-#include "config.h"
 #include "sensor.h"
 
 void kalman_filter_init() {
@@ -51,7 +51,7 @@ void update_theta(int bus_acc, int bus_gyr) {
             // 姿勢角速度のセンサ値
             float theta_dot_gyro = get_gyr_data(pi, bus_gyr);
 
-            //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
+            // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
             float tran_C_theta[2][1] = {};
             mat_tran(C_theta[0], tran_C_theta[0], 1, 2);
@@ -62,15 +62,16 @@ void update_theta(int bus_acc, int bus_gyr) {
             float G[2][1] = {};
             mat_mul_const(P_CT[0], G_temp2, G[0], 2, 1);
 
-            //theta_data estimation: theta = theta'+G(y-Ctheta')
+            // theta_data estimation: theta = theta'+G(y-Ctheta')
             float C_theta_theta[1][1] = {};
-            mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2, 2, 1);
+            mat_mul(C_theta[0], theta_data_predict[0], C_theta_theta[0], 1, 2,
+                    2, 1);
             float delta_y = theta - C_theta_theta[0][0];
             float delta_theta[2][1] = {};
             mat_mul_const(G[0], delta_y, delta_theta[0], 2, 1);
             mat_add(theta_data_predict[0], delta_theta[0], theta_data[0], 2, 1);
 
-            //calculate covariance matrix: P=(I-GC)P'
+            // calculate covariance matrix: P=(I-GC)P'
             float GC[2][2] = {};
             float I2[2][2] = {{1, 0}, {0, 1}};
             mat_mul(G[0], C_theta[0], GC[0], 2, 1, 1, 2);
@@ -78,14 +79,15 @@ void update_theta(int bus_acc, int bus_gyr) {
             mat_sub(I2[0], GC[0], I2_GC[0], 2, 2);
             mat_mul(I2_GC[0], P_theta_predict[0], P_theta[0], 2, 2, 2, 2);
 
-            //predict the next step data: theta'=Atheta+Bu
+            // predict the next step data: theta'=Atheta+Bu
             float A_theta_theta[2][1] = {};
             float B_theta_dot[2][1] = {};
             mat_mul(A_theta[0], theta_data[0], A_theta_theta[0], 2, 2, 2, 1);
             mat_mul_const(B_theta[0], theta_dot_gyro, B_theta_dot[0], 2, 1);
-            mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2, 1);
+            mat_add(A_theta_theta[0], B_theta_dot[0], theta_data_predict[0], 2,
+                    1);
 
-            //predict covariance matrix: P'=APA^T + BUB^T
+            // predict covariance matrix: P'=APA^T + BUB^T
             float AP[2][2] = {};
             float APAT[2][2] = {};
             float tran_A_theta[2][2] = {};
@@ -107,15 +109,14 @@ void update_theta(int bus_acc, int bus_gyr) {
 }
 
 void kalman_filter_update() {
-    //measurement data
+    // measurement data
     float theta1_dot_temp = get_gyr_data(pi, bus_gyr);
-    y[0][0] = theta_data[0][0] * 3.14f / 180;   // rad
-    y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;  // rad/s
-    y[2][0] = encoder_value * (2 * 3.14f) / (4 * encoder_resolution);   // rad
-    y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;                   // rad/s
+    y[0][0] = theta_data[0][0] * 3.14f / 180;                         // rad
+    y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;     // rad/s
+    y[2][0] = encoder_value * (2 * 3.14f) / (4 * encoder_resolution); // rad
+    y[3][0] = (y[2][0] - pre_theta2) / feedback_rate;                 // rad/s
 
-
-    //calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
+    // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
     float tran_C_x[4][4];
     float P_CT[4][4];
     float G_temp1[4][4];
@@ -129,8 +130,7 @@ void kalman_filter_update() {
     mat_inv(G_temp2[0], G_temp2_inv[0], 4, 4);
     mat_mul(P_CT[0], G_temp2_inv[0], G[0], 4, 4, 4, 4);
 
-
-    //x_data estimation: x = x'+G(y-Cx')
+    // x_data estimation: x = x'+G(y-Cx')
     float C_x_x[4][1];
     float delta_y[4][1];
     float delta_x[4][1];
@@ -139,8 +139,7 @@ void kalman_filter_update() {
     mat_mul(G[0], delta_y[0], delta_x[0], 4, 4, 4, 1);
     mat_add(x_data_predict[0], delta_x[0], x_data[0], 4, 1);
 
-
-    //calculate covariance matrix: P=(I-GC)P'
+    // calculate covariance matrix: P=(I-GC)P'
     float GC[4][4];
     float I4[4][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
     float I4_GC[4][4];
@@ -148,8 +147,7 @@ void kalman_filter_update() {
     mat_sub(I4[0], GC[0], I4_GC[0], 4, 4);
     mat_mul(I4_GC[0], P_x_predict[0], P_x[0], 4, 4, 4, 4);
 
-
-    //predict the next step data: x'=Ax+Bu
+    // predict the next step data: x'=Ax+Bu
     float Vin = motor_value;
     if (motor_value > MAX_VOLTAGE) {
         Vin = MAX_VOLTAGE;
@@ -163,8 +161,7 @@ void kalman_filter_update() {
     mat_mul_const(B_x[0], Vin, B_x_Vin[0], 4, 1);
     mat_add(A_x_x[0], B_x_Vin[0], x_data_predict[0], 4, 1);
 
-
-    //predict covariance matrix: P'=APA^T + BUB^T
+    // predict covariance matrix: P'=APA^T + BUB^T
     float tran_A_x[4][4];
     float AP[4][4];
     float APAT[4][4];

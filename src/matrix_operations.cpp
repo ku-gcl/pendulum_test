@@ -24,12 +24,14 @@ void mat_sub(float *m1, float *m2, float *sol, int row, int column) {
 }
 
 // Matrix multiplication
-void mat_mul(float *m1, float *m2, float *sol, int row1, int column1, int row2, int column2) {
+void mat_mul(float *m1, float *m2, float *sol, int row1, int column1, int row2,
+             int column2) {
     for (int i = 0; i < row1; i++) {
         for (int j = 0; j < column2; j++) {
             sol[i * column2 + j] = 0;
             for (int k = 0; k < column1; k++) {
-                sol[i * column2 + j] += m1[i * column1 + k] * m2[k * column2 + j];
+                sol[i * column2 + j] +=
+                    m1[i * column1 + k] * m2[k * column2 + j];
             }
         }
     }
@@ -59,7 +61,7 @@ void mat_mul_const(float *m1, float c, float *sol, int row, int column) {
 // Matrix inversion (by Gaussian elimination)
 void mat_inv(float *m, float *sol, int column, int row) {
     // allocate memory for a temporary matrix
-    float* temp = (float *)malloc(column * 2 * row * sizeof(float));
+    float *temp = (float *)malloc(column * 2 * row * sizeof(float));
 
     // make the augmented matrix
     for (int i = 0; i < column; i++) {
@@ -119,7 +121,8 @@ void mat_inv(float *m, float *sol, int column, int row) {
         for (int j = i + 1; j < column; j++) {
             float pivot = temp[(column - 1 - j) * (2 * row) + (row - 1 - i)];
             for (int k = 0; k < 2 * row; k++) {
-                temp[(column - 1 - j) * (2 * row) + k] -= pivot * temp[(column - 1 - i) * (2 * row) + k];
+                temp[(column - 1 - j) * (2 * row) + k] -=
+                    pivot * temp[(column - 1 - i) * (2 * row) + k];
             }
         }
     }

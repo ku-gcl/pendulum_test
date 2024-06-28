@@ -1,12 +1,11 @@
-#include <unistd.h>
 #include <cmath>
+#include <unistd.h>
 
+#include "config.h"
 #include "motor_control.h"
 #include "pigpiod_if2.h"
-#include "config.h"
 
-void motor_driver_init(int pi)
-{
+void motor_driver_init(int pi) {
     gpio_write(pi, IN1, 0);
     gpio_write(pi, IN2, 0);
     set_PWM_frequency(pi, PWM, 10000);
@@ -14,8 +13,7 @@ void motor_driver_init(int pi)
     set_PWM_dutycycle(pi, PWM, 0);
 }
 
-void motor_control_update()
-{
+void motor_control_update() {
     // モーター制御の更新処理
     motor_value = 0;
 

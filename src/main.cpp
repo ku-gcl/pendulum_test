@@ -1,21 +1,20 @@
-#include <pigpiod_if2.h>
-#include <unistd.h>
-#include <iostream>
-#include <thread>
 #include <chrono>
+#include <iostream>
+#include <pigpiod_if2.h>
+#include <thread>
+#include <unistd.h>
 
 #include "config.h"
-#include "sensor.h"
+#include "csv_writer.h" // CSV 書き込み機能をインクルード
+#include "encoder.h"
 #include "kalman_filter.h"
 #include "motor_control.h"
-#include "encoder.h"
-#include "csv_writer.h" // CSV 書き込み機能をインクルード
+#include "sensor.h"
 
 std::thread thread1;
 std::thread thread2;
 
-void setup()
-{
+void setup() {
     pi = pigpio_start(NULL, NULL);
     bus_acc = i2c_open(pi, 1, ACC_ADDR, 0);
     bus_gyr = i2c_open(pi, 1, GYR_ADDR, 0);
@@ -36,8 +35,10 @@ void setup()
     gpio_write(pi, LED_R, 0);
     gpio_write(pi, LED_G, 0);
 
-    acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean, theta_variance);
-    gyr_init(pi, bus_gyr, sample_num, meas_interval, theta_dot_mean, theta_dot_variance);
+    acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean,
+             theta_variance);
+    gyr_init(pi, bus_gyr, sample_num, meas_interval, theta_dot_mean,
+             theta_dot_variance);
 
     encoder_value = 0;
     motor_driver_init(pi);
@@ -48,15 +49,14 @@ void setup()
 
     // CSV ファイルのオープン
     // createDirectoryIfNotExists(LOG_DATA_DIR);
-    // std::string filename = LOG_DATA_DIR + "log_" + getCurrentDateTime() + ".csv";
-    // openCSVFile(filename);
+    // std::string filename = LOG_DATA_DIR + "log_" + getCurrentDateTime() +
+    // ".csv"; openCSVFile(filename);
 
     gpio_write(pi, LED_R, 0);
     gpio_write(pi, LED_G, 0);
 }
 
-int main()
-{
+int main() {
     setup();
 
     thread1 = std::thread(rotary_encoder);
@@ -66,11 +66,11 @@ int main()
 
     auto start = std::chrono::system_clock::now();
 
-    while (true)
-    {
+    while (true) {
         auto loop_start = std::chrono::system_clock::now();
 
-        // main loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
+        // main
+        // loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
         update_theta_syn_flag = 0;
         gpio_write(pi, LED_R, 0);
         gpio_write(pi, LED_G, 0);
@@ -90,10 +90,10 @@ int main()
 
         // データの取得（仮の値を使用）
         // 測定値
-        float theta_p = y[0][0];        // rad
-        float theta_p_dot = y[1][0];    // rad/s
-        float theta_w = y[2][0];        // rad
-        float theta_w_dot = y[3][0];    // rad/s
+        float theta_p = y[0][0];     // rad
+        float theta_p_dot = y[1][0]; // rad/s
+        float theta_w = y[2][0];     // rad
+        float theta_w_dot = y[3][0]; // rad/s
 
         // KFの推定値
         float theta_p_kf = x_data[0][0];
@@ -107,17 +107,24 @@ int main()
         float log_pwm_duty = pwm_duty;
 
         // display表示
-        console_write(elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf, log_motor_value, log_motor_direction, log_pwm_duty);
+        console_write(elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot,
+                      theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
+                      log_motor_value, log_motor_direction, log_pwm_duty);
 
         // CSV書き込み
-        // csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf, log_motor_value, log_motor_direction, log_pwm_duty);
+        // csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w,
+        // theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
+        // log_motor_value, log_motor_direction, log_pwm_duty);
 
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;
 
         // 処理時間を含めたスリープ時間の計算
         auto loop_end = std::chrono::system_clock::now();
-        auto loop_duration = std::chrono::duration_cast<std::chrono::milliseconds>(loop_end - loop_start).count();
+        auto loop_duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(loop_end -
+                                                                  loop_start)
+                .count();
         auto sleep_time = feedback_dura - loop_duration;
         if (sleep_time > 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));

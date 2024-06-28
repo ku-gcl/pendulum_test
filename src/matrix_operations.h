@@ -12,7 +12,8 @@ void mat_add(float *m1, float *m2, float *sol, int row, int column);
 void mat_sub(float *m1, float *m2, float *sol, int row, int column);
 
 // Matrix multiplication
-void mat_mul(float *m1, float *m2, float *sol, int row1, int column1, int row2, int column2);
+void mat_mul(float *m1, float *m2, float *sol, int row1, int column1, int row2,
+             int column2);
 
 // Matrix transposition
 void mat_tran(float *m1, float *sol, int row_original, int column_original);
