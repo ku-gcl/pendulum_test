@@ -48,10 +48,9 @@ void console_write(float elapsed_time, float theta_p, float theta_p_dot,
                    float theta_p_kf, float theta_p_dot_kf) {
     std::cout << std::fixed << std::setprecision(3);
     std::cout << std::setw(10) << elapsed_time << "," << std::setw(10)
-              << theta_p * rad2deg << "," << std::setw(10)
-              << theta_p_dot * rad2deg << "," << std::setw(10)
-              << theta_p_kf * rad2deg << "," << std::setw(10)
-              << theta_p_dot_kf * rad2deg << std::endl;
+              << theta_p << "," << std::setw(10) << theta_p_dot << ","
+              << std::setw(10) << theta_p_kf << "," << std::setw(10)
+              << theta_p_dot_kf << std::endl;
 }
 
 void bmx055_init() {
@@ -283,8 +282,8 @@ int main() {
         // float theta_p_kf = theta_data[0][0];
         // float theta_p_dot_kf = theta_data[1][0];
 
-        float theta_p = get_acc_data(pi, bus_acc);     // rad
-        float theta_p_dot = get_gyr_data(pi, bus_gyr); // rad/s
+        float theta_p = get_acc_data(pi, bus_acc);     // deg
+        float theta_p_dot = get_gyr_data(pi, bus_gyr); // deg/s
         float theta_p_kf = 0.0f;
         float theta_p_dot_kf = 0.0f;
 
