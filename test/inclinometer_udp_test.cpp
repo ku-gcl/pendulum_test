@@ -225,9 +225,9 @@ void update_theta(int bus_acc, int bus_gyr) {
             enc_syn = 0;
 
             // 姿勢角のセンサ値
-            theta = get_acc_data(pi, bus_acc);
+            theta = get_acc_data(pi, bus_acc); // deg
             // 姿勢角速度のセンサ値
-            theta_dot_gyro = get_gyr_data(pi, bus_gyr);
+            theta_dot_gyro = get_gyr_data(pi, bus_gyr); // deg/s
 
             // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
