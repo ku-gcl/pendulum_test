@@ -11,8 +11,49 @@
 #include "motor_control.h"
 #include "sensor.h"
 
+// udp
+#include <arpa/inet.h>
+#include <cstring>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 std::thread thread1;
 std::thread thread2;
+
+//  TODO: move to config.cpp **********************************
+// udp
+int SOCKET_PORT = 12345;
+const char *SOCKET_IP = "192.168.1.199";
+
+// sensor
+float theta;
+float theta_dot_gyro;
+// float xAccl = 0.0f, yAccl = 0.0f, zAccl = 0.0f;
+// float xGyro = 0.0f, yGyro = 0.0f, zGyro = 0.0f;
+
+int init_udp_socket(int &sockfd, struct sockaddr_in &servaddr, const char *ip,
+                    int port) {
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        std::cerr << "Error creating socket" << std::endl;
+        return -1;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+    servaddr.sin_addr.s_addr = inet_addr(ip);
+
+    return 0;
+}
+
+void send_udp_packet(int sockfd, struct sockaddr_in &servaddr,
+                     const char *data) {
+    sendto(sockfd, data, strlen(data), 0, (struct sockaddr *)&servaddr,
+           sizeof(servaddr));
+}
+// ************************************************************
 
 void setup() {
     pi = pigpio_start(NULL, NULL);
@@ -34,6 +75,8 @@ void setup() {
     sleep(1);
     gpio_write(pi, LED_R, 0);
     gpio_write(pi, LED_G, 0);
+
+    bmx055_init(pi, bus_acc, bus_gyr);
 
     acc_init(pi, bus_acc, sample_num, meas_interval, theta_mean,
              theta_variance);
@@ -62,7 +105,17 @@ int main() {
     thread1 = std::thread(rotary_encoder);
     thread2 = std::thread(update_theta, bus_acc, bus_gyr);
 
+    // エンコーダの初期値を設定
+    code = int((gpio_read(pi, pin2) << 1) + gpio_read(pi, pin1)) & 0xf;
+
     gpio_write(pi, LED_Y, 0);
+
+    // udp settings
+    int sockfd;
+    struct sockaddr_in servaddr;
+    if (init_udp_socket(sockfd, servaddr, SOCKET_IP, SOCKET_PORT) < 0) {
+        return 1;
+    }
 
     auto start = std::chrono::system_clock::now();
 
@@ -111,6 +164,19 @@ int main() {
                       theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
                       log_motor_value, log_motor_direction, log_pwm_duty);
 
+        // console_write(elapsed_time, theta_p, theta_p_dot, theta_w,
+        // theta_w_dot,
+        //               0, 0, 0, 0, 0, 0, 0);
+
+        // UDPパケットの送信
+        char buffer[1024];
+        snprintf(buffer, sizeof(buffer),
+                 "data;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f", elapsed_time,
+                 theta_p, theta_p_dot, theta_w, theta_w_dot, theta_p_kf,
+                 theta_p_dot_kf, theta_w_kf, theta_w_dot_kf, log_motor_value,
+                 log_motor_direction, log_pwm_duty);
+        send_udp_packet(sockfd, servaddr, buffer);
+
         // CSV書き込み
         // csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w,
         // theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
@@ -129,7 +195,6 @@ int main() {
         if (sleep_time > 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
         }
-        // std::this_thread::sleep_for(std::chrono::milliseconds(feedback_dura));
     }
 
     closeCSVFile();

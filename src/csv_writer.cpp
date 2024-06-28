@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "config.h"
+
 std::ofstream csvFile;
 
 void signalHandler(int signum) {
@@ -57,11 +59,14 @@ void console_write(float elapsed_time, float theta_p, float theta_p_dot,
 
     /** all **/
     std::cout << std::setw(10) << elapsed_time << "," << std::setw(10)
-              << theta_p << "," << std::setw(10) << theta_p_dot << ","
-              << std::setw(10) << theta_w << "," << std::setw(10) << theta_w_dot
-              << "," << std::setw(10) << theta_p_kf << "," << std::setw(10)
-              << theta_p_dot_kf << "," << std::setw(10) << theta_w_kf << ","
-              << std::setw(10) << theta_w_dot_kf << "," << std::setw(10)
+              << theta_p * rad2deg << "," << std::setw(10)
+              << theta_p_dot * rad2deg << "," << std::setw(10)
+              << theta_w * rad2deg << "," << std::setw(10)
+              << theta_w_dot * rad2deg << "," << std::setw(10)
+              << theta_p_kf * rad2deg << "," << std::setw(10)
+              << theta_p_dot_kf * rad2deg << "," << std::setw(10)
+              << theta_w_kf * rad2deg << "," << std::setw(10)
+              << theta_w_dot_kf * rad2deg << "," << std::setw(10)
               << log_motor_value << "," << std::setw(10) << log_motor_direction
               << "," << std::setw(10) << log_pwm_duty << std::endl;
 }

@@ -39,17 +39,17 @@ void kalman_filter_init() {
 }
 
 void update_theta(int bus_acc, int bus_gyr) {
-    // if (update_theta_syn_flag == 0) {
-    //     return;
-    // }
+    if (update_theta_syn_flag == 0) {
+        return;
+    }
     while (true) {
         if (update_theta_syn_flag == 1) {
             enc_syn = 0;
 
             // 姿勢角のセンサ値
-            float theta = get_acc_data(pi, bus_acc);
+            float theta = get_theta_p_deg(pi, bus_acc);
             // 姿勢角速度のセンサ値
-            float theta_dot_gyro = get_gyr_data(pi, bus_gyr);
+            float theta_dot_gyro = get_theta_p_dot_deg(pi, bus_gyr);
 
             // calculate Kalman gain: G = P'C^T(W+CP'C^T)^-1
             float P_CT[2][1] = {};
@@ -110,7 +110,7 @@ void update_theta(int bus_acc, int bus_gyr) {
 
 void kalman_filter_update() {
     // measurement data
-    float theta1_dot_temp = get_gyr_data(pi, bus_gyr);
+    float theta1_dot_temp = get_theta_p_dot_deg(pi, bus_gyr);
     y[0][0] = theta_data[0][0] * 3.14f / 180;                         // rad
     y[1][0] = (theta1_dot_temp - theta_data[1][0]) * 3.14f / 180;     // rad/s
     y[2][0] = encoder_value * (2 * 3.14f) / (4 * encoder_resolution); // rad

@@ -3,6 +3,9 @@
 #include <string>
 
 extern int pi;
+extern const double PI;      // 円周率
+extern const double rad2deg; // ラジアンを度に変換する定数
+extern const double deg2rad;
 extern int bus_acc;
 extern int bus_gyr;
 const int ACC_ADDR = 0x19;
@@ -67,3 +70,7 @@ extern int update_theta_syn_flag;
 extern int code;
 
 extern float y[4][1];
+
+// imu
+extern float xAccl, yAccl, zAccl;
+extern float xGyro, yGyro, zGyro;

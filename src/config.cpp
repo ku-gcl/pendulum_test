@@ -11,6 +11,10 @@ float theta_variance;
 float theta_dot_mean;
 float theta_dot_variance;
 float y[4][1];
+
+const double PI = 3.14159265358979323846; // 円周率
+const double rad2deg = 180.0 / PI; // ラジアンを度に変換する定数
+const double deg2rad = PI / 180.0;
 // フォルダ名は最後に"/"を付けること
 std::string LOG_DATA_DIR = "/home/ubuntu/pendulum_pj/pendulum_test/data/";
 
@@ -66,3 +70,7 @@ float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269,
 int enc_syn = 1;
 int update_theta_syn_flag = 1;
 int code;
+
+// imu
+float xAccl = 0.0f, yAccl = 0.0f, zAccl = 0.0f;
+float xGyro = 0.0f, yGyro = 0.0f, zGyro = 0.0f;
