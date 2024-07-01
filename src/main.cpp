@@ -122,6 +122,9 @@ int main() {
     while (true) {
         auto loop_start = std::chrono::system_clock::now();
 
+        // stop theta update process
+        update_theta_syn_flag = 0;
+
         // main
         // loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
         update_theta_syn_flag = 0;
@@ -129,7 +132,11 @@ int main() {
         gpio_write(pi, LED_G, 0);
 
         kalman_filter_update();
-        motor_control_update();
+
+        // for safety
+        // エンコーダの回転数が2回転以上(=2pi*2)回転したらモーター出力停止
+        bool motor_update = (abs(y[2][0]) < 13);
+        motor_control_update(motor_update);
 
         //=========================================================
         // Log data
