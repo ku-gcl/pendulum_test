@@ -51,6 +51,7 @@ float B_x[4][1] = {{-0.0002871073058120404},
                    {0.0018551680368610664},
                    {0.36744493066118095}};
 float C_x[4][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+
 // measurement noise matrix
 float measure_variance_mat[4][4] = {{0}};
 float voltage_error = 0.01f; // volt
@@ -61,10 +62,13 @@ int feedback_dura = 10;      // msec
 float motor_value = 0.0f;
 int pwm_duty = 0;
 int motor_direction = 1;
-float motor_offset = 0.17f; // volt
+// float motor_offset = 0.17f; // volt
+float motor_offset = 0.00f; // volt
 float MAX_VOLTAGE = 3.3f;   // エンコーダーに入力する最大電圧 [V]
-float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269,
-                 0.3061630717935332};
+// float Gain[4] = {26.987014073601006, 4.147178701122192, 0.009365626359250269,
+//                  0.3061630717935332};
+float Gain[4] = {29.280615696374042, 4.508435265182227, 0.041799188964630814,
+                 0.32713225613691527};
 
 // encoder
 int enc_syn = 1;
