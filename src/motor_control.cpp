@@ -12,8 +12,20 @@ void motor_driver_init(int pi) {
     set_PWM_range(pi, PWM, 100);
     set_PWM_dutycycle(pi, PWM, 0);
 }
+void motor_control_update(bool update_motor) {
+    if (!update_motor) {
+        // モーター制御をリセット
+        motor_value = 0;
+        pwm_duty = 0;
+        set_PWM_dutycycle(pi, PWM, pwm_duty);
+        gpio_write(pi, IN1, 0);
+        gpio_write(pi, IN2, 0);
+        gpio_write(pi, LED_G, 0);
+        gpio_write(pi, LED_R, 0);
+        motor_direction = 0;
+        return;
+    }
 
-void motor_control_update() {
     // モーター制御の更新処理
     motor_value = 0;
 
