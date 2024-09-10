@@ -91,9 +91,10 @@ void setup() {
     gpio_write(pi, LED_G, 1);
 
     // CSV ファイルのオープン
-    // createDirectoryIfNotExists(LOG_DATA_DIR);
-    // std::string filename = LOG_DATA_DIR + "log_" + getCurrentDateTime() +
-    // ".csv"; openCSVFile(filename);
+    createDirectoryIfNotExists(LOG_DATA_DIR);
+    std::string filename =
+        LOG_DATA_DIR + "log_" + getCurrentDateTime() + ".csv";
+    openCSVFile(filename);
 
     gpio_write(pi, LED_R, 0);
     gpio_write(pi, LED_G, 0);
@@ -185,9 +186,10 @@ int main() {
         send_udp_packet(sockfd, servaddr, buffer);
 
         // CSV書き込み
-        // csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w,
-        // theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
-        // log_motor_value, log_motor_direction, log_pwm_duty);
+        csv_write(time, elapsed_time, theta_p, theta_p_dot, theta_w,
+                  theta_w_dot, theta_p_kf, theta_p_dot_kf, theta_w_kf,
+                  theta_w_dot_kf, log_motor_value, log_motor_direction,
+                  log_pwm_duty);
 
         pre_theta2 = y[2][0];
         update_theta_syn_flag = 1;
