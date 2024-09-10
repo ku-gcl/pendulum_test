@@ -1,4 +1,6 @@
 #include <chrono>
+#include <iomanip> // for setting precision
+#include <iostream>
 #include <thread>
 
 #include "config.h"
@@ -36,6 +38,17 @@ void kalman_filter_init() {
     measure_variance_mat[2][2] = encoder_error * encoder_error;
     float encoder_rate_error = encoder_error / feedback_rate;
     measure_variance_mat[3][3] = encoder_rate_error * encoder_rate_error;
+
+    // 行列の表示
+    std::cout << "Measure Variance Matrix:" << std::endl;
+    std::cout << std::fixed << std::setprecision(6); // 小数点以下6桁で表示
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            std::cout << measure_variance_mat[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 void update_theta(int bus_acc, int bus_gyr) {
