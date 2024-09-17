@@ -17,7 +17,8 @@
 
 // udp
 int SOCKET_PORT = 12345;
-const char *SOCKET_IP = "192.168.1.199";
+// const char *SOCKET_IP = "192.168.1.199";
+const char *SOCKET_IP = "192.168.11.2";
 
 // thread
 std::thread thread2;
@@ -409,7 +410,9 @@ int main() {
 
         // KFの推定値
         float theta_p_kf = theta_data[0][0] * deg2rad;
-        float theta_p_dot_kf = theta_data[1][0] * deg2rad;
+        // float theta_p_dot_kf = theta_data[1][0] * deg2rad;
+        float theta_p_dot_kf =
+            theta_p_dot - (theta_data[1][0] * deg2rad); // w - w_offset
 
         // display表示
         console_write(elapsed_time, theta_p, theta_p_dot, theta_p_kf,
