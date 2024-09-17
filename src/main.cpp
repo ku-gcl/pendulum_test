@@ -123,9 +123,6 @@ int main() {
     while (true) {
         auto loop_start = std::chrono::system_clock::now();
 
-        // stop theta update process
-        update_theta_syn_flag = 0;
-
         // main
         // loop中はtheta（振子の姿勢角）の更新（kalman_filter.cpp/update_theta）を停止
         update_theta_syn_flag = 0;
@@ -171,10 +168,6 @@ int main() {
         console_write(elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot,
                       theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
                       log_motor_value, log_motor_direction, log_pwm_duty);
-
-        // console_write(elapsed_time, theta_p, theta_p_dot, theta_w,
-        // theta_w_dot,
-        //               0, 0, 0, 0, 0, 0, 0);
 
         // UDPパケットの送信
         char buffer[1024];
