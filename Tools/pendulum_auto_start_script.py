@@ -12,11 +12,17 @@ PEN_CLEAN_DIR = os.path.join(BASE_DIR, "PENDULUM_CLEANUP")
 GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)
 
+# Pin for the LED (GPIO 27)
+LED_Y = 27
+
 #Set 9pin(GPIO) and 10pin(GPIO) to "input mode" and "pullup setting"(input is 0 when pressing the button, otherwise input is 1)
 SW1 = 9        # shutdown
 SW2 = 10       # control and shutdown
 GPIO.setup(SW1, GPIO.IN, pull_up_down=GPIO.PUD_UP)   # shutdown
 GPIO.setup(SW2, GPIO.IN, pull_up_down=GPIO.PUD_UP)   # control and shutdown
+
+# Set GPIO 27 (LED_Y) as output
+GPIO.setup(LED_Y, GPIO.OUT)
 
 # CODE_EXEC_FLAG is a flag variable
 # If pendulum program is executing, CODE_EXEC_FLAG = True
@@ -29,6 +35,9 @@ print("To shutdown, press YELLOW and BLACK button for 2 seconds")
 while True:
     sw1_timer = 0
     sw2_timer = 0
+    
+    # Turn on the LED when entering the while loop
+    GPIO.output(LED_Y, GPIO.HIGH)  # Turn on LED_Y
 
     while True:
         sw1_status = GPIO.input(SW1)
@@ -52,6 +61,7 @@ while True:
                 
                 print("-------Control END------\n")
                 CODE_EXEC_FLAG = False
+                GPIO.output(LED_Y, GPIO.LOW)  # Turn off LED_Y after control ends
                 break
             
 
