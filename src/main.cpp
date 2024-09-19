@@ -92,8 +92,15 @@ void setup() {
 
     // CSV ファイルのオープン
     createDirectoryIfNotExists(LOG_DATA_DIR);
-    std::string filename =
-        LOG_DATA_DIR + "log_" + getCurrentDateTime() + ".csv";
+    // std::string filename =
+    //     LOG_DATA_DIR + "log_" + getCurrentDateTime() + ".csv";
+    // ファイル名を構築
+    std::ostringstream filenameStream;
+    filenameStream << LOG_DATA_DIR << "log_" << getCurrentDateTime() << "_Gain_"
+                   << std::fixed << std::setprecision(1) << Gain[0] << "_"
+                   << Gain[1] << "_" << Gain[2] << "_" << Gain[3] << "_MaxV"
+                   << MAX_VOLTAGE << ".csv";
+    std::string filename = filenameStream.str();
     openCSVFile(filename);
 
     gpio_write(pi, LED_R, 0);
