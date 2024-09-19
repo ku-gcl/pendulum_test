@@ -105,7 +105,7 @@ source ./cleanup.sh
 ## ボタン動作の内容を記述したファイルを実行
 
 ```bash
-python3 /home/ubuntu/pendulum_pj/pendulum_test/pendulum_auto_start_script.py
+python3 /home/ubuntu/pendulum_pj/pendulum_test/Tools/pendulum_auto_start_script.py
 ```
 
 `python`ではなく、`python3`を使用すること。
