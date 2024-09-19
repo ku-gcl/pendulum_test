@@ -11,6 +11,14 @@ void motor_driver_init(int pi) {
     set_PWM_frequency(pi, PWM, 10000);
     set_PWM_range(pi, PWM, 100);
     set_PWM_dutycycle(pi, PWM, 0);
+
+    set_PWM_frequency(pi, IN1, 10000);
+    set_PWM_range(pi, IN1, 100);
+    set_PWM_dutycycle(pi, IN1, 0);
+
+    set_PWM_frequency(pi, IN2, 10000);
+    set_PWM_range(pi, IN2, 100);
+    set_PWM_dutycycle(pi, IN2, 0);
 }
 void motor_control_update(bool update_motor) {
     if (!update_motor) {
@@ -41,45 +49,34 @@ void motor_control_update(bool update_motor) {
         motor_value -= motor_offset;
     }
 
+    if (motor_value > MAX_VOLTAGE) {
+        motor_value = MAX_VOLTAGE;
+    } else if (motor_value < -MAX_VOLTAGE) {
+        motor_value = -MAX_VOLTAGE;
+    }
+
     // PWMデューティサイクルの計算
-    pwm_duty = static_cast<int>(motor_value * 100.0f / MAX_VOLTAGE);
+    pwm_duty = static_cast<int>(motor_value * 100.0f / BATTERY_VOLTAGE);
 
     // モーターの駆動方向に応じてGPIOピンを制御
     if (pwm_duty >= 0) {
-        // オーバーボルテージ保護
-        if (pwm_duty > 100) {
-            pwm_duty = 100;
-        }
-        // 逆転からの保護
-        if (motor_direction == 2) {
-            gpio_write(pi, IN1, 0);
-            gpio_write(pi, IN2, 0);
-            usleep(100); // 100usec待機
-        }
         // 順転
-        set_PWM_dutycycle(pi, PWM, pwm_duty);
-        gpio_write(pi, IN1, 1);
-        gpio_write(pi, IN2, 0);
+        set_PWM_dutycycle(pi, PWM, 100);
+
+        set_PWM_dutycycle(pi, IN1, pwm_duty);
+        set_PWM_dutycycle(pi, IN2, 0);
+
         gpio_write(pi, LED_G, 1);
         motor_direction = 1;
     } else {
         // PWMデューティサイクルの絶対値を計算
         pwm_duty = -pwm_duty;
-
-        // オーバーボルテージ保護
-        if (pwm_duty > 100) {
-            pwm_duty = 100;
-        }
-        // 順転からの保護
-        if (motor_direction == 1) {
-            gpio_write(pi, IN1, 0);
-            gpio_write(pi, IN2, 0);
-            usleep(100); // 100usec待機
-        }
         // 逆転
-        set_PWM_dutycycle(pi, PWM, pwm_duty);
-        gpio_write(pi, IN1, 0);
-        gpio_write(pi, IN2, 1);
+        set_PWM_dutycycle(pi, PWM, 100);
+
+        set_PWM_dutycycle(pi, IN1, 0);
+        set_PWM_dutycycle(pi, IN2, pwm_duty);
+
         gpio_write(pi, LED_R, 1);
         motor_direction = 2;
     }

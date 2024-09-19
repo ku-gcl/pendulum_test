@@ -1,6 +1,8 @@
 #include <chrono>
+#include <iomanip> // std::setprecision
 #include <iostream>
 #include <pigpiod_if2.h>
+#include <sstream> // std::ostringstream
 #include <thread>
 #include <unistd.h>
 
@@ -140,7 +142,8 @@ int main() {
 
         // for safety
         // エンコーダの回転数が2回転以上(=2pi*2)回転したらモーター出力停止
-        bool motor_update = (abs(y[2][0]) < 13);
+        // bool motor_update = (abs(y[2][0]) < 13);
+        bool motor_update = 1;
         motor_control_update(motor_update);
 
         //=========================================================
@@ -172,9 +175,10 @@ int main() {
         float log_pwm_duty = pwm_duty;
 
         // display表示
-        console_write(elapsed_time, theta_p, theta_p_dot, theta_w, theta_w_dot,
-                      theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
-                      log_motor_value, log_motor_direction, log_pwm_duty);
+        // console_write(elapsed_time, theta_p, theta_p_dot, theta_w,
+        // theta_w_dot,
+        //               theta_p_kf, theta_p_dot_kf, theta_w_kf, theta_w_dot_kf,
+        //               log_motor_value, log_motor_direction, log_pwm_duty);
 
         // UDPパケットの送信
         char buffer[1024];
