@@ -84,8 +84,8 @@ g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/PENDULUM_CLEANUP /home/ubuntu/
 ## スクリプトの実行
 
 ```
-g++ -o LED LED.cpp -lpigpiod_if2 -lrt
-sudo ./LED
+g++ -o /home/ubuntu/pendulum_pj/pendulum_test/bin/LED /home/ubuntu/pendulum_pj/pendulum_test/unit_test/LED.cpp -lpigpiod_if2 -lrt
+sudo /home/ubuntu/pendulum_pj/pendulum_test/bin/LED
 ```
 
 ```
