@@ -71,6 +71,10 @@ while True:
                 # C++コードをバックグラウンドで実行。そのためにsubprocess.Popenを使用
                 EXEC_CMD = "sudo {}".format(PEN_DIR)
                 exec_process = subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # stdout, stderr = exec_process.communicate()
+                # print("Standard Output:", stdout.decode())
+                # print("Error Output:", stderr.decode())
+                
                 GPIO.wait_for_edge(SW2, GPIO.RISING)
                 time.sleep(1)
                 print("-------Control Executed------\n")
