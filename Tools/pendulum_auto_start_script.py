@@ -86,6 +86,15 @@ while True:
             sw1_timer = sw1_timer + 1
             if sw1_timer >= 20:
                 print("-------SHUTDOWN------\n")
+                # LED_Yを2秒間チカチカさせる
+                blink_duration = 2  # 秒
+                blink_interval = 0.2  # 秒
+                end_time = time.time() + blink_duration
+                while time.time() < end_time:
+                    GPIO.output(LED_Y, GPIO.HIGH)
+                    time.sleep(blink_interval / 2)
+                    GPIO.output(LED_Y, GPIO.LOW)
+                    time.sleep(blink_interval / 2)
                 subprocess.run("sudo shutdown -h now", shell=True)
                 break
 
