@@ -119,8 +119,8 @@ float motor_value = 0.0f;
 int pwm_duty = 0;
 int motor_direction = 1;
 // float motor_offset = 0.17f; // volt
-float motor_offset = 0.00f; // volt
-float MAX_VOLTAGE = 3.3f; // モータードライバに入力する最大電圧 [V]
+float motor_offset = 0.00f;   // volt
+float MAX_VOLTAGE = 3.3f;     // モーターに入力する最大電圧 [V]
 float BATTERY_VOLTAGE = 5.0f; // バッテリー電圧
 
 // encoder
