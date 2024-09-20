@@ -69,11 +69,10 @@ while True:
             if sw2_timer >= 20:
                 print("-------Control START------\n")
                 # C++コードをバックグラウンドで実行。そのためにsubprocess.Popenを使用
+                # subprocess.Popenのデッドロック（途中で制御が終了する）を防止するため、
+                # stdout=subprocess.PIPE, stderr=subprocess.PIPEをstdout=subprocess.DEVNULL, stderr=subprocess.DEVNULLに変更
                 EXEC_CMD = "sudo {}".format(PEN_DIR)
-                exec_process = subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                # stdout, stderr = exec_process.communicate()
-                # print("Standard Output:", stdout.decode())
-                # print("Error Output:", stderr.decode())
+                exec_process = subprocess.Popen(EXEC_CMD, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 
                 GPIO.wait_for_edge(SW2, GPIO.RISING)
                 time.sleep(1)
