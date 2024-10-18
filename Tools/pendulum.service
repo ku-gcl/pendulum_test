@@ -1,0 +1,10 @@
+[Unit]
+Description=Execution pendulum auto start script
+# After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 pendulum_auto_start_script.py
+WorkingDirectory=/home/ubuntu/pendulum_pj/pendulum_test/Tools
+
+[Install]
+WantedBy=multi-user.target
