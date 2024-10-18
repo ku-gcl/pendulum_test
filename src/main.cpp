@@ -27,7 +27,8 @@ std::thread thread2;
 // udp
 int SOCKET_PORT = 12345;
 // const char *SOCKET_IP = "192.168.1.200";
-const char *SOCKET_IP = "192.168.11.23";
+// const char *SOCKET_IP = "192.168.11.23";
+const char *SOCKET_IP = "192.168.2.1";
 
 // sensor
 float theta;
