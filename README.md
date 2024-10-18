@@ -7,7 +7,7 @@
 ## 自動起動スクリプトの設定
 
 ```bash
-sudo mv Tools/pendulum.service /etc/systemd/system/
+sudo cp Tools/pendulum.service /etc/systemd/system/
 sudo systemctl daemon-reload
 
 # 自動起動の有効化
