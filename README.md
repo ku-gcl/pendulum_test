@@ -1,7 +1,7 @@
 # Overview
-Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, Japan.
+Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, Japan. Software ver1. published on January 8th, 2025 [here](https://github.com/ku-gcl/gcl-pendulum/releases/tag/ver1).
 
-Source code for an inverted pendulum
+This repository is a source code for an inverted pendulum.
 
 ![pendulum](document/figure/pendulum.jpg)
 
