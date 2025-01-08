@@ -1,4 +1,4 @@
-# Overview
+# gcl-pendulum
 Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, Japan. 
 
 Software version 1 published on January 8, 2025. [Download here](https://github.com/ku-gcl/gcl-pendulum/releases/tag/ver1).
