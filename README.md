@@ -3,6 +3,7 @@ Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, J
 
 Source code for an inverted pendulum
 
+![pendulum](document/figure/pendulum.jpg)
 
 
 
