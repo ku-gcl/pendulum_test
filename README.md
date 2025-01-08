@@ -1,6 +1,10 @@
 # Overview
+Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, Japan.
 
-倒立振子用のテストコード
+Source code for an inverted pendulum
+
+
+
 
 # 最新の情報
 
