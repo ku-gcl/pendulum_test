@@ -3,7 +3,9 @@ Tatsuya Shiotsuka, Shodai Hirayama, Sohta Katoh, Mai Bando, Kyushu University, J
 
 This repository contains the source code for controlling an inverted pendulum.
 
-![pendulum](document/figure/pendulum.jpg)
+ <img src="document/figure/pendulum.jpg" width="30%" />
+
+<!--![pendulum](document/figure/pendulum.jpg)-->
 
 
 
